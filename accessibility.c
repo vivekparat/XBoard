@@ -180,6 +180,8 @@ char *pieceTypeName[] = {
 	
 char *squareToChar[] = { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l" };
 
+char *squareToCharSeirawan[] = { "Promote", "Demote", "a", "b", "c", "d", "e", "f", "g", "h", "Demote", "Promote" };
+
 char *squareToNum[] = {"naught", "1", "2", "3", "4", "5", "6", "7", "8", "9" };	
 
 char *ordinals[] = {"zeroth", "first", "second", "third", "fourth", "fifth", "sixth", "seventh", "eighth", "nineth"};
@@ -200,7 +202,12 @@ char* PieceToName(ChessSquare p, int i){
 char* SquareToChar(x)
 			int x;
 {
-		return squareToChar[x - BOARD_LEFT];
+       if (gameInfo.variant == VariantSChess
+       || gameInfo.variant == VariantSuper
+       || gameInfo.variant == VariantGreat)
+               return squareToCharSeirawan[x];
+       else
+               return squareToChar[x];
 }
 
 char* SquareToNum(y)
