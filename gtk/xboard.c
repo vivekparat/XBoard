@@ -1938,6 +1938,12 @@ void MoveTypeInProc(eventkey)
         return;
     }
 
+    if (eventkey->keyval == GDK_KEY_Up ||
+		eventkey->keyval == GDK_KEY_Right ||
+		eventkey->keyval == GDK_KEY_Left ||
+		eventkey->keyval == GDK_KEY_Down )
+			gtk_widget_grab_focus(boardWidget);
+
     buf[0]=eventkey->keyval;
     buf[1]='\0';
     if (eventkey->keyval > 32 && eventkey->keyval < 256 || *buf == 27)
