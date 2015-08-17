@@ -7502,7 +7502,7 @@ KeyNavigation(int key)
 			y = fromY;
 		}
 		
-		if(((key==11 && !flipView) || (key==12 && flipView)) && y<7 )
+		if(((key==11 && !flipView) || (key==12 && flipView)) && y<BOARD_HEIGHT+-1 )
 			y++;
 			
 		if(((key==12 && !flipView) || (key==11 && flipView)) && y>0 )
@@ -7511,7 +7511,8 @@ KeyNavigation(int key)
 		if(((key==13 && !flipView) || (key==14 && flipView)) && x>0 ) 
 			x--;
 
-		if(((key==14 && !flipView) || (key==13 && flipView)) && x<7 )
+		if(((key==14 && !flipView) || (key==13 && flipView)) &&
+			x<BOARD_RGHT + gameInfo.holdingsWidth -1)
 			x++;
 		
 		//Not Locked
