@@ -7422,8 +7422,8 @@ void
 KeyNavigation(int key)
 {
 	static int lock = 0;
-	static int x = 0;
-	static int y = 0;
+	static int x = 3;
+	static int y = 2;
 	int mouse_from_x,mouse_to_x,mouse_from_y,mouse_to_y;
 	ChessSquare currentpiece;
 	char info[200];
