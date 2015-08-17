@@ -7424,6 +7424,8 @@ KeyNavigation(int key)
 	static int lock = 0;
 	static int x = 3;
 	static int y = 2;
+	static int sub_x = -1;
+	static int sub_y = -1;
 	int mouse_from_x,mouse_to_x,mouse_from_y,mouse_to_y;
 	ChessSquare currentpiece;
 	char info[200];
@@ -7466,15 +7468,24 @@ KeyNavigation(int key)
 		if (lock == 0){
 			if (OKToStartUserMove(fromX, fromY)) {
 			currentpiece = boards[currentMove][y][x];
-			sprintf(info,"%s selected at %s-%d ",PieceToName(currentpiece,1),SquareToChar(x),y+1);
-			set_accessible_description(info,TRUE);
-
 			MarkTargetSquares(1);			
 			MarkTargetSquares(0);
 			lock = 1;
+			if (gameInfo.variant == VariantSChess && (x==0 || x==11)){
+					sprintf(info,"Substitution Peace %s selected at %s-%d ",PieceToName(currentpiece,1),SquareToChar(x),y+1);
+					lock = 0;
+					sub_x = mouse_to_x;
+					sub_y = mouse_to_y;;
+					set_accessible_description(info,TRUE);
+				}
+			else{
+					sprintf(info,"%s selected at %s-%d ",PieceToName(currentpiece,1),SquareToChar(x),y+1);
+					set_accessible_description(info,TRUE);
+				}			
 			}
 			else{
 			lock = 0;
+			sub_x = -1,sub_y = -1;
 			set_accessible_description("Cannot lock at here!",TRUE);
 			}
 		}
@@ -7488,6 +7499,8 @@ KeyNavigation(int key)
 				printf("\nSame Square");
 			}
 			else{					
+				if (gameInfo.variant == VariantSChess && sub_x != -1)
+					LeftClick(Press, sub_x, sub_y); 
 				if (gameMode != EditPosition) //Kludge - otherwise pece will be deleted
 						LeftClick(Press, mouse_from_x, mouse_from_y); 
 				LeftClick(Release, mouse_to_x, mouse_to_y);
