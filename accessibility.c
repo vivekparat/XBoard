@@ -459,7 +459,7 @@ SayAllBoard()
 	for(Ypos=BOARD_HEIGHT-1; Ypos>=0; Ypos--) {
 		ynum = ordinals[Ypos + (gameInfo.boardHeight < 10)];
 		set_accessible_description(ynum, FALSE);
-		set_accessible_description("rank", FALSE);
+		set_accessible_description("rank, ", FALSE);
 		for(Xpos=BOARD_LEFT; Xpos<BOARD_RGHT; Xpos++) {
 			currentpiece = boards[currentMove][Ypos][Xpos];
 			if(currentpiece != EmptySquare) {
@@ -921,7 +921,15 @@ SayMoveDetailed(int move_number)
 	char *piece, *xchar, *ynum, *p, checkMark = 0;
 	char c, buf[MSG_SIZ], comment[MSG_SIZ];
 	len = strlen(parseList[move_number]);
-	comment[0]= 0;	
+	comment[0]= 0;
+	
+	if (appData.announceMoveBrief)
+	{
+		set_accessible_description(parseList[move_number], TRUE);
+		//printf("\nDaTa = : %s",moveList[move_number]);
+		return;
+	}
+		
 	if(parseList[move_number][len-1] == '+' || parseList[move_number][len-1] == '#') {
 		/* you are in checkmate */
 		len--; // strip off check or mate indicator

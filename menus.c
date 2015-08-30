@@ -418,6 +418,13 @@ AnnounceMoveProc ()
 }
 
 void
+AnnounceMoveBriefProc ()
+{
+  appData.announceMoveBrief = !appData.announceMoveBrief;
+  MARK_MENU_ITEM("Options.AnnounceMove", appData.announceMoveBrief);
+}
+
+void
 PonderNextMoveProc ()
 {
   PonderNextMoveEvent(!appData.ponderNextMove);
@@ -769,6 +776,7 @@ MenuItem optionsMenu[] = {
   {"----",                        NULL,              NULL,                 NothingProc},
 #endif
   {N_("Announce Move"),       	  NULL,             "AnnounceMove",        AnnounceMoveProc,        CHECK },
+  {N_("Announce Move Brief"),     NULL,             "AnnounceMoveBrief",   AnnounceMoveBriefProc,   CHECK },
   {N_("Save Settings Now"),       NULL,             "SaveSettingsNow",     SaveSettingsProc},
   {N_("Save Settings on Exit"),   NULL,             "SaveSettingsonExit",  SaveOnExitProc,         CHECK },
   {NULL,                          NULL,              NULL,                 NULL}
@@ -1363,6 +1371,10 @@ InitMenuMarkers()
     
     if (appData.announceMove) {
 	MarkMenuItem("Options.AnnounceMove", True);
+	}
+
+    if (appData.announceMoveBrief) {
+	MarkMenuItem("Options.AnnounceMoveBrief", True);
 	}
 	
     if (appData.showAccessibilityStatusbar) {
