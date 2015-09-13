@@ -130,6 +130,7 @@ AC_SUBST(CAIRO_LIBS)
 
 dnl | check which front end to use
 dnl | first check for gtk
+dnl | then for gtk2
 dnl | then for Xaw3d
 dnl | and then for Xaw
 FRONTEND_CFLAGS=""
@@ -138,7 +139,13 @@ FRONTEND_LIBS=""
 AC_ARG_WITH([gtk],
             [AS_HELP_STRING([--with-gtk],[use GTK front-end (default)])],
             [with_GTK=$withval],
-            [with_GTK="yes"])
+            [with_GTK="no"])
+
+AC_ARG_WITH([gtk2],
+            [AS_HELP_STRING([--with-gtk2],[use GTK-2 front-end ])],
+            [with_GTK2=$withval],
+            [with_GTK2="no"])
+
 
 AC_ARG_WITH([Xaw3d],
             [AS_HELP_STRING([--with-Xaw3d],[use Xaw3d front-end (not fully supported anymore)])],
@@ -223,67 +230,90 @@ AC_SUBST(MIMEDIR)
 AC_SUBST(GAMEDATADIR)
 
 dnl | check for libraries
-if test x"$with_GTK" = x"yes" ; then
-  PKG_CHECK_MODULES([GTK], [ gtk+-2.0 >= 2.16.0 gmodule-2.0 ])
-  FRONTEND_CFLAGS=$GTK_CFLAGS
-  FRONTEND_LIBS=$GTK_LIBS
-  with_Xaw="no"
+
+
+if test x"$with_GTK2" = x"no" -a x"$with_Xaw" = x"no" -a x"$with_Xaw3d" = x"no"; then
+
+	PKG_CHECK_MODULES([GTK], [ gtk+-3.0 >= 3.0 ],[gtk_available="yes"],[gtk_available="no"])
+	
+	if test x"$gtk_available" = x"no" -a x"$with_GTK" = x"yes"; then
+			AC_MSG_ERROR([GTK headers not found. Please install the GTK Development packages.])
+	fi
+	
+	if test x"$gtk_available" = x"yes"; then 
+		with_GTK="yes"
+		FRONTEND_CFLAGS=$GTK_CFLAGS
+		FRONTEND_LIBS=$GTK_LIBS			
+	fi
 fi
 
-if test x"$with_GTK" = x"no" ; then
+if test x"$with_GTK" = x"no" -a x"$with_Xaw" = x"no" -a x"$with_Xaw3d" = x"no"; then
+	PKG_CHECK_MODULES([GTK2], [ gtk+-2.0 >= 2.16.0 gmodule-2.0 ],[gtk2_available="yes"],[gtk2_available="no"])
+	
+	if test x"$gtk2_available" = x"no" -a x"$with_GTK2" = x"yes"; then
+			AC_MSG_ERROR([GTK2 headers not found. Please install the GTK2 Development packages.])
+	fi
+	
+	if test x"$gtk2_available" = x"yes"; then 
+		with_GTK2="yes"
+		FRONTEND_CFLAGS=$GTK2_CFLAGS
+		FRONTEND_LIBS=$GTK2_LIBS
+		AC_DEFINE(USING_GTK2,[1],["Using GTK version 2"])			
+	fi
+fi
 
-dnl | general check for Xaw and Xaw3d
-  AC_PATH_XTRA
-  if test -n "$no_x" ; then
-    AC_MSG_ERROR([ "    $PACKAGE requires the X Window System header files and libraries!
-    They were not found on your system.  See FAQ topic C.2.
-    configure failed"])
-  fi
 
-  save_cflags="$CFLAGS"
-  save_cppflags="$CPPFLAGS"
-  CFLAGS="$CFLAGS $X_CFLAGS"
-  CPPFLAGS="$CPPFLAGS $X_CFLAGS"
-  AC_CHECK_HEADER([X11/Intrinsic.h],[xt="yes"],[xt="no"])
-  CFLAGS="$save_cflags"
-  CPPFLAGS="$save_cppflags"
+if test x"$with_GTK" = x"no" -a x"$with_GTK2" = x"no" -a x"$with_Xaw3d" = x"no"; then
 
-  if test "$xt" = "no" ; then
-     AC_MSG_ERROR([Xt headers not found. Please install the X11 packages.])
-  fi
-
-dnl | check availability of Xaw3d
-  FRONTEND_LIBS=
-  AS_IF([test x"$with_Xaw3d" != x"no"],
-  	    [AC_CHECK_LIB([Xaw3d],
-                    [XawTextReplace],
-                    [ FRONTEND_LIBS="-lXaw3d"
-                      AC_DEFINE([USE_XAW3D], [1], [Define if you want to use Xaw3d])],
-                    [AC_MSG_ERROR([--with-Xaw3d was given, but test for Xaw3d failed. Make sure that you have Xaw3d installed, else you might want to try the configure option --without-Xaw3d])],
-			       [-lXaw])])
-
-dnl | no Xaw3d, check for Xaw; make it the default
-  if test x"$with_Xaw3d" = x"no" ; then
-     with_Xaw=yes
-     save_cflags="$CFLAGS"
-     save_cppflags="$CPPFLAGS"
-     CFLAGS="$CFLAGS $X_CFLAGS"
-     CPPFLAGS="$CPPFLAGS $X_CFLAGS"
      AC_CHECK_HEADER([X11/Xaw/Dialog.h],[xaw_headers="yes"], [xaw_headers="no"])
-     CFLAGS="$save_cflags"
-     CPPFLAGS="$save_cppflags"
 
-     if test x"$xaw_headers" = x"no" ; then
-        AC_MSG_ERROR([Xaw headers not found. Please install the Xaw package and headers.])
-     fi
-
-     FRONTEND_LIBS="-lXaw"
-  fi
-
+	if test x"$xaw_headers" = x"no" -a x"$with_Xaw" = x"yes"; then
+			AC_MSG_ERROR([Xaw headers not found. Please install the X11 packages.])
+	fi
+	
+	if test x"$xaw_headers" = x"yes"; then 
+		with_Xaw="yes"
+		FRONTEND_LIBS="-lXaw"
+		CFLAGS="$CFLAGS $X_CFLAGS"
+		CPPFLAGS="$CPPFLAGS $X_CFLAGS"		
+	fi
+	
 fi
+
+
+
+if test x"$with_GTK" = x"no" -a x"$with_GTK2" = x"no" -a x"$with_Xaw" = x"no"; then
+
+	AC_CHECK_HEADER([X11/Intrinsic.h],[xt="yes"],[xt="no"])
+
+  	 AC_CHECK_LIB([Xaw3d], [XawTextReplace],
+                    [ Xaw3d_available="yes" ], [ Xaw3d_available="no"],[-lXaw])	
+
+
+	if test x"$Xaw3d_available" = x"no" -a x"$with_Xaw3d" = x"yes"; then
+			AC_MSG_ERROR([Xaw3d headers not found. Please install the X11 packages.])
+
+		    if test -n "$no_x" ; then
+				AC_MSG_ERROR([ "    $PACKAGE requires the X Window System header files and libraries!
+				They were not found on your system.  See FAQ topic C.2.
+				configure failed"])
+			fi
+	fi
+
+	if test x"$Xaw3d_available" = x"yes"; then 
+		with_Xaw3d="yes"
+		FRONTEND_LIBS="-lXaw3d"
+		AC_DEFINE([USE_XAW3D], [1])
+		CFLAGS="$CFLAGS $X_CFLAGS"
+		CPPFLAGS="$CPPFLAGS $X_CFLAGS"		
+	else
+		AC_MSG_ERROR([ "$PACKAGE requires at least one among Gtk, Gtk2, Xaw or Xaw3d header files and libraries!"])
+	fi	
+fi
+
 
 dnl | make results available in Makefile.am
-AM_CONDITIONAL([withGTK],   [test x"$with_GTK" = x"yes"])
+AM_CONDITIONAL([withGTK],   [test x"$with_GTK" = x"yes" || test x"$with_GTK2" = x"yes" ])
 AM_CONDITIONAL([withXaw],   [test x"$with_Xaw3d" = x"yes" || test x"$with_Xaw" = x"yes"])
 
 dnl | end Front-end check
@@ -585,6 +615,7 @@ echo ""
 echo "        NLS support:     $USE_NLS"
 echo ""
 echo "        GTK:             $with_GTK"
+echo "        GTK2:            $with_GTK2"
 echo "        Xaw3d:           $with_Xaw3d"
 echo "        Xaw:             $with_Xaw"
 echo ""
