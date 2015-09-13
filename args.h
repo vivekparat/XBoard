@@ -314,6 +314,9 @@ ArgDescriptor argDescriptors[] = {
   { "xcoords", ArgFalse, (void *) &appData.showCoords, FALSE, INVALID },
   { "-coords", ArgFalse, (void *) &appData.showCoords, FALSE, INVALID },
   { "showThinking", ArgBoolean, (void *) &appData.showThinking, TRUE, (ArgIniType) FALSE },
+  { "showAccessibilityStatusbar", ArgBoolean, (void *) &appData.showAccessibilityStatusbar, TRUE, (ArgIniType) FALSE },
+  { "AnnounceMove", ArgBoolean, (void *) &appData.announceMove, TRUE, (ArgIniType) FALSE }, //text to speech
+  { "announceMoveBrief", ArgBoolean, (void *) &appData.announceMoveBrief, TRUE, (ArgIniType) FALSE },
   { "thinking", ArgTrue, (void *) &appData.showThinking, FALSE, INVALID },
   { "xthinking", ArgFalse, (void *) &appData.showThinking, FALSE, INVALID },
   { "-thinking", ArgFalse, (void *) &appData.showThinking, FALSE, INVALID },

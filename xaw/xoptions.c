@@ -780,6 +780,19 @@ GraphEventProc(Widget widget, caddr_t client_data, XEvent *event)
 		case Button4: button = 4; break;
 		case Button5: button = 5; break;
 	    }
+	    break;
+	case KeyPress:
+		printf("\nKey Pressed %d",((XKeyEvent*)event)->keycode);
+		switch(((XKeyEvent*)event)->keycode) {
+		case 113: button = 13; break;
+		case 114: button = 14; break;
+		case 111: button = 11; break;
+		case 116: button = 12; break;
+		case 65: button = 15; break;
+		case 35: button = 16; break;
+		case 119: button = 17; break;
+	    }
+	    break;
     }
     button *= f;
     opt = userHandler(button, w, h);
@@ -829,6 +842,32 @@ GenericCallback (Widget w, XtPointer client_data, XtPointer call_data)
 
     shells[dlg] = oldSh; // in case of multiple instances, restore previous (as this one could be popped down now)
 }
+
+void notify_accessible_description(Option *opt, char *val)
+{
+	printf("\nRecived %s",val);	
+
+    Arg arg;
+    XtSetArg(arg, XtNlabel, (XtArgVal) val);
+    XtSetValues(opt->handle, &arg, 1);
+
+	//char buf[8000];
+	//system("pkill paplay");
+	//sprintf(buf,"pico2wave -l en-GB -w info.wav '%s' && paplay info.wav &",val);
+	//system(buf);
+}
+
+void 
+show_hide_accessibility_status_bar(Option *opt,int val)
+{
+	//if (val){
+	//	gtk_widget_show(GTK_WIDGET(opt->handle));
+	//}
+	//else{
+	//	gtk_widget_hide(GTK_WIDGET(opt->handle));
+	//}
+}
+
 
 void
 TabProc (Widget w, XEvent *event, String *prms, Cardinal *nprms)
@@ -1102,6 +1141,7 @@ GenericPopUp (Option *option, char *title, DialogClass dlgNr, DialogClass parent
 	    break;
 	  case Icon:
 	  case Label:
+	  case NotificationLabel:
 	    msg = option[i].name;
 	    if(!msg) break;
 	    chain = option[i].min;
@@ -1192,7 +1232,7 @@ GenericPopUp (Option *option, char *title, DialogClass dlgNr, DialogClass parent
 				   option[i].max /* w */, option[i].value /* h */, option[i].min /* chain */);
 	    option[i].handle = (void*)
 		(last = XtCreateManagedWidget("graph", widgetClass, form, args, j));
-	    XtAddEventHandler(last, ExposureMask | ButtonPressMask | ButtonReleaseMask | PointerMotionMask, False,
+	    XtAddEventHandler(last, ExposureMask | ButtonPressMask | KeyPressMask| ButtonReleaseMask | PointerMotionMask, False,
 		      (XtEventHandler) GraphEventProc, &option[i]); // mandatory user-supplied expose handler
 	    if(option[i].min & SAME_ROW) last = forelast, forelast = lastrow;
 	    option[i].choice = (char**) cairo_image_surface_create (CAIRO_FORMAT_ARGB32, option[i].max, option[i].value); // image buffer

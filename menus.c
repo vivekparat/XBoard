@@ -89,6 +89,7 @@ extern char *getenv();
 #include "backend.h"
 #include "menus.h"
 #include "gettext.h"
+#include "accessibility.h"
 
 #ifdef ENABLE_NLS
 # define  _(s) gettext (s)
@@ -400,6 +401,29 @@ NothingProc ()
 #   define MARK_MENU_ITEM(X,Y) MarkMenuItem(X, Y)
 #endif
 
+
+void
+ShowAccessibilityStatusbarProc ()
+{
+  appData.showAccessibilityStatusbar = !appData.showAccessibilityStatusbar;
+  ShowAccessibilityStatusbarEvent();
+  MarkMenuItem("Accessibility.ShowAccessibilityStatusbar", appData.showAccessibilityStatusbar);
+}
+
+void
+AnnounceMoveProc ()
+{
+  appData.announceMove = !appData.announceMove;
+  MarkMenuItem("Options.AnnounceMove", appData.announceMove);
+}
+
+void
+AnnounceMoveBriefProc ()
+{
+  appData.announceMoveBrief = !appData.announceMoveBrief;
+  MarkMenuItem("Options.AnnounceMoveBrief", appData.announceMoveBrief);
+}
+
 void
 PonderNextMoveProc ()
 {
@@ -583,6 +607,12 @@ SaveSelectedProc ()
 		  SaveSelected, "a");
 }
 
+void 
+sayMachineMove()
+{
+	SayMachineMove(TRUE);
+}
+
 /*
  *  Menu definition tables
  */
@@ -745,9 +775,36 @@ MenuItem optionsMenu[] = {
   {N_("Test Legality"),          "<Ctrl><Shift>l",  "TestLegality",        TestLegalityProc},
   {"----",                        NULL,              NULL,                 NothingProc},
 #endif
+  {N_("Announce Move"),       	  NULL,             "AnnounceMove",        AnnounceMoveProc,        CHECK },
+  {N_("Announce Move Brief"),     NULL,             "AnnounceMoveBrief",   AnnounceMoveBriefProc,   CHECK },
   {N_("Save Settings Now"),       NULL,             "SaveSettingsNow",     SaveSettingsProc},
   {N_("Save Settings on Exit"),   NULL,             "SaveSettingsonExit",  SaveOnExitProc,         CHECK },
   {NULL,                          NULL,              NULL,                 NULL}
+};
+
+MenuItem accessibilityMenu[] = {
+  {N_("Show Status Bar"),	 NULL,   "ShowAccessibilityStatusbar", ShowAccessibilityStatusbarProc,			CHECK},
+  {"----",                   NULL,       NULL,                    NothingProc},	
+  {N_("SayClockTime"),		 "<Alt>t",   "SayClockTime",          SayClockTime},
+  {"----",                   NULL,       NULL,                    NothingProc},
+  {N_("SayWhosTurn"),		 "<Alt><Shift>m",   "SayWhosTurn",    SayWhosTurn},
+  {N_("SayMachineMove"),	 "<Alt>x",   "SayMachineMove",        sayMachineMove},
+  {N_("SayNextMove"),	     "Next",   "SayNextMove",             SayNextMove},
+  {N_("SayPreviousMove"),	 "Prior",   "SayPreviousMove",        SayPreviousMove},  
+  {"----",                   NULL,       NULL,                    NothingProc},
+  {N_("SayAllBoard"),		 "<Alt>p",   "SayAllBoard",           SayAllBoard},
+  {N_("SayWhitePieces"),	 "<Alt>w",   "SayWhitePieces",        SayWhitePieces},
+  {N_("SayBlackPieces"),	 "<Alt>b",   "SayBlackPieces",        SayBlackPieces},
+  {N_("ReadRow"),		     "<Alt>r",   "ReadRow",               ReadRow},
+  {N_("ReadColumn"),		 "<Alt><Shift>f",   "ReadColumn",     ReadColumn},
+  {"----",                   NULL,       NULL,                    NothingProc},
+  {N_("SayUpperDiagnols"),		 "<Alt>u",   "SayUpperDiagnols",  SayUpperDiagnols},
+  {N_("SayLowerDiagnols"),		 "<Alt>l",   "SayLowerDiagnols",  SayLowerDiagnols},
+  {N_("SayKnightMoves"),		 "<Alt><Shift>n","SayKnightMoves",SayKnightMoves},
+  {N_("SayCurrentPos"),		     "<Alt>s",   "SayCurrentPos",     SayCurrentPos},
+  {N_("PossibleAttackMove"),	 "<Alt><Shift>a","PossibleAttackMove",PossibleAttackMove},
+  {N_("PossibleAttacked"),		 "<Alt>d",   "PossibleAttacked",  PossibleAttacked},
+  {NULL,			 NULL,    NULL,			 NULL}
 };
 
 MenuItem helpMenu[] = {
@@ -803,6 +860,7 @@ Menu menuBar[] = {
     {N_("Action"),  "Action", actionMenu},
     {N_("Engine"),  "Engine", engineMenu},
     {N_("Options"), "Options", optionsMenu},
+    {N_("Accessibility"),   "Accessibility", accessibilityMenu},
     {N_("Help"),    "Help", helpMenu},
     {NULL, NULL, NULL},
     {   "",         "None", noMenu}
@@ -1310,6 +1368,19 @@ InitMenuMarkers()
     if (saveSettingsOnExit) {
 	MarkMenuItem("Options.SaveSettingsonExit", True);
     }
+    
+    if (appData.announceMove) {
+	MarkMenuItem("Options.AnnounceMove", True);
+	}
+
+    if (appData.announceMoveBrief) {
+	MarkMenuItem("Options.AnnounceMoveBrief", True);
+	}
+	
+    if (appData.showAccessibilityStatusbar) {
+	MarkMenuItem("Accessibility.ShowAccessibilityStatusbar", True);
+	}
+    ShowAccessibilityStatusbarEvent();
     EnableNamedMenuItem("File.SaveSelected", False);
 
     // all XBoard builds get here, but not WinBoard...

@@ -1097,6 +1097,28 @@ GraphExpose (Option *opt, int x, int y, int w, int h)
 }
 
 
+void notify_accessible_description(Option *opt, char *val)
+{
+	AtkObject *atk_ob;
+	GtkWidget *frame;
+	frame = gtk_widget_get_parent(GTK_WIDGET(opt->handle));
+	atk_ob = gtk_widget_get_accessible (GTK_WIDGET(frame));
+	gtk_label_set_text(GTK_LABEL(opt->handle),val);
+	atk_object_notify_state_change(atk_ob,ATK_STATE_SHOWING,TRUE);
+}
+
+void 
+show_hide_accessibility_status_bar(Option *opt,int val)
+{	
+	if (val){
+		gtk_widget_show(GTK_WIDGET(opt->handle));
+	}
+	else{
+		gtk_widget_hide(GTK_WIDGET(opt->handle));
+	}
+}
+
+
 void GenericCallback(GtkWidget *widget, gpointer gdata)
 {
     const gchar *name;
@@ -1649,6 +1671,38 @@ if(appData.debugMode) printf("n=%d, h=%d, w=%d\n",n,height,width);
             gtk_widget_set_size_request(label, option[i].max ? option[i].max : -1, -1);
             Pack(hbox, table, label, left, left+2, top, 0);
             break;
+
+	  case NotificationLabel:
+            option[i].handle = (void *) (label = gtk_label_new(option[i].name));
+            /* Left Justify */
+#ifdef USING_GTK2
+            gtk_misc_set_alignment(GTK_MISC(label), 0, 0.5);
+#else
+			gtk_widget_set_halign(GTK_WIDGET(label),GTK_ALIGN_START);
+#endif
+            SetWidgetFont(label, option[i].font);
+            gtk_label_set_ellipsize(GTK_LABEL(label),PANGO_ELLIPSIZE_END);  
+            
+            GtkWidget *frame_inner = gtk_frame_new(NULL);
+			gtk_container_add(GTK_CONTAINER(frame_inner), label);
+
+
+            GtkWidget *frame_outer = gtk_frame_new(NULL);
+			gtk_container_add(GTK_CONTAINER(frame_outer), frame_inner);
+
+			AtkObject *atk_ob1;
+			atk_ob1 = gtk_widget_get_accessible (GTK_WIDGET(frame_inner));				
+			atk_object_set_role(atk_ob1,ATK_ROLE_NOTIFICATION);
+			
+			AtkObject *atk_ob2;
+			atk_ob2 = gtk_widget_get_accessible (GTK_WIDGET(frame_outer));				
+			atk_object_set_role(atk_ob2,ATK_ROLE_STATUSBAR);
+			
+			label = frame_outer;
+	    
+            gtk_widget_set_size_request(label, option[i].max ? option[i].max : -1, -1);
+            Pack(hbox, table, label, left, left+r, top, 0);
+	    break;
 
 	  case Label:
             option[i].handle = (void *) (label = gtk_label_new(option[i].name));

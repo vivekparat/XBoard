@@ -187,6 +187,16 @@ AC_ARG_WITH([gamedatadir],
             [GAMEDATADIR="$withval"],
             [GAMEDATADIR='$(datadir)/games/xboard'])
 
+AC_ARG_WITH([espeak],
+            [AS_HELP_STRING([--with-espeak],[use espeak tts ])],
+            [with_espeak=$withval],
+            [with_espeak="no"])
+
+AC_ARG_WITH([speech-dispatcher],
+            [AS_HELP_STRING([--with-speech-dispatcher],[use speech-dispatcher (recommended)])],
+            [with_speech_dispatcher="$withval"],
+            [with_speech_dispatcher="no"])            
+
 AC_ARG_ENABLE([update-mimedb],
 	      [AS_HELP_STRING([--disable-update-mimedb],[disable the update-mime-database after install [default=no]])],
 	      [enable_mimedb="no"],
@@ -311,12 +321,33 @@ if test x"$with_GTK" = x"no" -a x"$with_GTK2" = x"no" -a x"$with_Xaw" = x"no"; t
 	fi	
 fi
 
-
 dnl | make results available in Makefile.am
 AM_CONDITIONAL([withGTK],   [test x"$with_GTK" = x"yes" || test x"$with_GTK2" = x"yes" ])
 AM_CONDITIONAL([withXaw],   [test x"$with_Xaw3d" = x"yes" || test x"$with_Xaw" = x"yes"])
 
 dnl | end Front-end check
+
+dnl| Check for TTS API
+if test x"$with_espeak" = x"yes"; then
+	AC_CHECK_LIB([espeak],
+	[espeak_Cancel],
+	,
+	[AC_MSG_ERROR([Espeak development Library not found!])])
+	CFLAGS="$CFLAGS -I/usr/include/espeak/"
+	CPPFLAGS="$CFLAGS -I/usr/include/espeak/"
+	AC_DEFINE(USING_ESPEAK_API,[1],["Using Espeak API"])
+fi
+
+
+
+if test x"$with_speech_dispatcher" = x"yes";then
+	AC_CHECK_LIB([speechd],
+	[spd_say],
+	,
+	[AC_MSG_ERROR([speech-dispatcher development Library not found!])])
+	CFLAGS="$CFLAGS -lspeechd"
+	AC_DEFINE(USING_SPEECH_DISPATCHER_API,[1],["Using Speech dispatcher API"])
+fi
 
 AC_CANONICAL_HOST
 
@@ -622,3 +653,8 @@ echo ""
 echo "        ptys:            $enable_ptys"
 echo "        zippy:           $enable_zippy"
 echo "        sigint:          $enable_sigint"
+echo ""
+echo "        Espeak:              $with_espeak"
+echo "        Speech-Dispatcher:   $with_speech_dispatcher"
+echo ""
+

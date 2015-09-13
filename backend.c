@@ -338,6 +338,7 @@ int border;       /* [HGM] width of board rim, needed to size seek graph  */
 #define TN_SGA  0003
 #define TN_PORT 23
 
+int oldFromX, oldFromY;
 char*
 safeStrCpy (char *dst, const char *src, size_t count)
 { // [HGM] made safe
@@ -1422,6 +1423,7 @@ ParseTimeControl (char *tc, float ti, int mps)
 void
 InitBackEnd2 ()
 {
+	TTS_init();
     if (appData.debugMode) {
 #    ifdef __GIT_VERSION
       fprintf(debugFP, "Version: %s (%s)\n", programVersion, __GIT_VERSION);
@@ -5027,7 +5029,10 @@ ParseBoard12 (char *string)
       if (appData.ringBellAfterMoves && /*!ics_user_moved*/ // [HGM] use absolute method to recognize own move
 	    !((gameMode == IcsPlayingWhite) && (!WhiteOnMove(moveNum)) ||
 	      (gameMode == IcsPlayingBlack) &&  (WhiteOnMove(moveNum))   ) ) {
-	if(newMove) RingBell(); else PlayIcsUnfinishedSound();
+	if(newMove){
+		RingBell();
+		SayMachineMove(TRUE); }
+		else PlayIcsUnfinishedSound();
       }
     }
 
@@ -7070,6 +7075,8 @@ UserMoveEvent(int fromX, int fromY, int toX, int toY, int promoChar)
     }
 
     FinishMove(moveType, fromX, fromY, toX, toY, promoChar);
+    SayMoveDetailed(currentMove-1);
+
 }
 
 /* Common tail of UserMoveEvent and DropMenuEvent */
@@ -7411,6 +7418,147 @@ void ReportClick(char *action, int x, int y)
 }
 
 Boolean right; // instructs front-end to use button-1 events as if they were button 3
+
+void 
+KeyNavigation(int key)
+{
+	static int lock = 0;
+	static int x = 3;
+	static int y = 2;
+	static int sub_x = -1;
+	static int sub_y = -1;
+	int mouse_from_x,mouse_to_x,mouse_from_y,mouse_to_y;
+	ChessSquare currentpiece;
+	char info[200];
+
+	if (!flipView){
+		mouse_from_x = (fromX+0.5)*(squareSize+lineGap);
+		mouse_to_x = (x+0.5)*(squareSize+lineGap);
+		mouse_from_y = ((BOARD_HEIGHT - 1 - fromY)+0.5)*(squareSize+lineGap);
+		mouse_to_y = ((BOARD_HEIGHT - 1 - y)+0.5)*(squareSize+lineGap);
+	}
+	else{
+		mouse_from_x = ((BOARD_WIDTH - 1 - fromX)+0.5)*(squareSize+lineGap);
+		mouse_to_x = ((BOARD_WIDTH - 1 - x)+0.5)*(squareSize+lineGap);
+		mouse_from_y = (fromY+0.5)*(squareSize+lineGap);
+		mouse_to_y = (y+0.5)*(squareSize+lineGap);
+	}
+
+	
+	if (key == 16){ //Space
+		SayCurrentPos();
+	}
+	else if(key == 17) //Delete Key
+	{
+		if (gameMode == EditPosition){
+			currentpiece = boards[currentMove][y][x];
+			if (currentpiece != EmptySquare){
+				sprintf(info,"%s-%d %s. Deleted!",SquareToChar(x),y+1,PieceToName(currentpiece,1));
+				LeftClick(Press, mouse_from_x, mouse_from_y);		
+				LeftClick(Release, -1, -1);
+			}
+			else{
+				sprintf(info,"%s-%d. No element to delete!",SquareToChar(x),y+1);
+			}
+		}else{
+			sprintf(info,"Not in Edit-position mode!");
+		}	
+		set_accessible_description(info,TRUE);
+	}
+	else if (key == 15){ //Enter Key Pressed
+		if (lock == 0){
+			if (OKToStartUserMove(fromX, fromY)) {
+			currentpiece = boards[currentMove][y][x];
+			MarkTargetSquares(1);			
+			MarkTargetSquares(0);
+			lock = 1;
+			if (gameInfo.variant == VariantSChess && (x==0 || x==11)){
+					sprintf(info,"Substitution Peace %s selected at %s-%d ",PieceToName(currentpiece,1),SquareToChar(x),y+1);
+					lock = 0;
+					sub_x = mouse_to_x;
+					sub_y = mouse_to_y;;
+					set_accessible_description(info,TRUE);
+				}
+			else{
+					sprintf(info,"%s selected at %s-%d ",PieceToName(currentpiece,1),SquareToChar(x),y+1);
+					set_accessible_description(info,TRUE);
+				}			
+			}
+			else{
+			lock = 0;
+			sub_x = -1,sub_y = -1;
+			set_accessible_description("Cannot lock at here!",TRUE);
+			}
+		}
+		else{
+			if (fromX == x && fromY == y){
+				lock = 0;
+				MarkTargetSquares(1);
+				currentpiece = boards[currentMove][y][x];
+				sprintf(info,"%s-%d %s Unselected!",SquareToChar(x),y+1,PieceToName(currentpiece,1));
+				set_accessible_description(info,TRUE);
+				printf("\nSame Square");
+			}
+			else{					
+				if (gameInfo.variant == VariantSChess && sub_x != -1)
+					LeftClick(Press, sub_x, sub_y); 
+				if (gameMode != EditPosition) //Kludge - otherwise pece will be deleted
+						LeftClick(Press, mouse_from_x, mouse_from_y); 
+				LeftClick(Release, mouse_to_x, mouse_to_y);
+				printf("\n %s",lastMsg);
+				lock = 0;
+		    }
+		}
+	}
+	else{ //Arrow Key Pressed
+		if ( fromX != -1 && fromY != -1 && (fromX != x || fromY != y) && lock != 1){
+			x = fromX;
+			y = fromY;
+		}
+		
+		if(((key==11 && !flipView) || (key==12 && flipView)) && y<BOARD_HEIGHT+-1 )
+			y++;
+			
+		if(((key==12 && !flipView) || (key==11 && flipView)) && y>0 )
+			y--;
+
+		if(((key==13 && !flipView) || (key==14 && flipView)) && x>0 ) 
+			x--;
+
+		if(((key==14 && !flipView) || (key==13 && flipView)) &&
+			x<BOARD_RGHT + gameInfo.holdingsWidth -1)
+			x++;
+		
+		//Not Locked
+		if (lock == 0){	
+			oldFromX = fromX;
+			oldFromY = fromY;
+			
+			fromX = x;
+			fromY = y;
+			
+			
+		}
+		SetHighlights(x, y, -1, -1);
+		printf("\nArrow keys pressed : x=%d y=%d fromX=%d fromY=%d",x,y,fromX,fromY);
+
+		currentpiece = boards[currentMove][y][x];
+		if (currentpiece != EmptySquare)
+			sprintf(info,"%s-%d %s.",SquareToChar(x),y+1,PieceToName(currentpiece,1));
+		else
+			sprintf(info,"%s-%d Empty.",SquareToChar(x),y+1);
+		set_accessible_description(info,TRUE);
+				
+		
+	}
+    
+    
+    //int side = (gameMode == IcsPlayingWhite || gameMode == MachinePlaysBlack ||
+	//	    gameMode != MachinePlaysWhite && gameMode != IcsPlayingBlack && WhiteOnMove(currentMove));
+    
+    //Print the current pece
+
+}
 
 void
 LeftClick (ClickType clickType, int xPix, int yPix)
@@ -8885,7 +9033,10 @@ FakeBookMove: // [HGM] book: we jump here to simulate machine moves after book h
 	ShowMove(fromX, fromY, toX, toY); /*updates currentMove*/
 
         if (!pausing && appData.ringBellAfterMoves) {
-	    if(!roar) RingBell();
+	    if(!roar){
+			RingBell();
+			SayMachineMove(TRUE);
+			}
 	}
 
 	/*
@@ -15699,6 +15850,7 @@ ForwardInner (int target)
 	DisplayComment(currentMove - 1, commentList[currentMove]);
     }
     ClearMap(); // [HGM] exclude: invalidate map
+    SayMoveDetailed(currentMove - 1);
 }
 
 
@@ -15818,6 +15970,7 @@ BackwardInner (int target)
     // [HGM] PV info: routine tests if comment empty
     DisplayComment(currentMove - 1, commentList[currentMove]);
     ClearMap(); // [HGM] exclude: invalidate map
+    SayMoveDetailed(currentMove);
 }
 
 void

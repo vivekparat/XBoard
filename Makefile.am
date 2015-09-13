@@ -51,6 +51,7 @@ xboard_SOURCES = backend.c backend.h backendz.h \
 		 evalgraph.c nevalgraph.c evalgraph.h \
 		 history.c nhistory.c \
 	 	 menus.c menus.h \
+	 	 accessibility.c accessibility.h \
 	 	 usounds.c usystem.c usystem.h \
 		 $(ZPY) $(FRONTENDsources)
 

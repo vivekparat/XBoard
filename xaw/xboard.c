@@ -2054,6 +2054,13 @@ MoveTypeInProc (Widget widget, caddr_t unused, XEvent *event)
 {
     char buf[10];
     KeySym sym;
+    //Arrow key should move keyboard focus to drawing area - Nalin.x.GNU
+    if(event->xkey.keycode == 111 ||
+	event->xkey.keycode == 113 ||
+	event->xkey.keycode == 114 || 
+	event->xkey.keycode == 116 )
+		XtSetKeyboardFocus(shellWidget, boardWidget);
+		    
     int n = XLookupString(&(event->xkey), buf, 10, &sym, NULL);
     if ( n == 1 && *buf >= 32 // printable
 	 && !(ShiftKeys() & 0x3C) // no Alt, Ctrl
@@ -2546,4 +2553,3 @@ UpdateLogos (int displ)
     if(displ) DisplayLogos(&optList[W_WHITE-1], &optList[W_BLACK+1]);
     return;
 }
-

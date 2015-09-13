@@ -55,6 +55,8 @@ extern char *getenv();
 #include "dialogs.h"
 #include "gettext.h"
 
+
+
 #ifdef ENABLE_NLS
 # define  _(s) gettext (s)
 # define N_(s) gettext_noop (s)
@@ -890,7 +892,7 @@ static Option boardOptions[] = {
 { 0, 0, 0, NULL, (void*) &nickName, "", NULL, TextBox, "" },
 { 0,SAME_ROW, 0, NULL, NULL, NULL, NULL, Break, NULL },
 { 0,          0, 70, NULL, (void*) &appData.whitePieceColor, "", NULL, TextBox, N_("White Piece Color:") },
-{ 1000, SAME_ROW, 0, NULL, (void*) &DefColor, NULL, (char**) "#FFFFCC", Button, "      " },
+{ 1000, SAME_ROW, 0, NULL, (void*) &DefColor, NULL, (char**) "#FFFFCC", Button, " Default " },
 /* TRANSLATORS: R = single letter for the color red */
 {    1, SAME_ROW, 0, NULL, (void*) &AdjustColor, NULL, NULL, Button, N_("R") },
 /* TRANSLATORS: G = single letter for the color green */
@@ -900,31 +902,31 @@ static Option boardOptions[] = {
 /* TRANSLATORS: D = single letter to make a color darker */
 {    4, SAME_ROW, 0, NULL, (void*) &AdjustColor, NULL, NULL, Button, N_("D") },
 { 0,          0, 70, NULL, (void*) &appData.blackPieceColor, "", NULL, TextBox, N_("Black Piece Color:") },
-{ 1000, SAME_ROW, 0, NULL, (void*) &DefColor, NULL, (char**) "#202020", Button, "      " },
+{ 1000, SAME_ROW, 0, NULL, (void*) &DefColor, NULL, (char**) "#202020", Button, " Default " },
 {    1, SAME_ROW, 0, NULL, (void*) &AdjustColor, NULL, NULL, Button, N_("R") },
 {    2, SAME_ROW, 0, NULL, (void*) &AdjustColor, NULL, NULL, Button, N_("G") },
 {    3, SAME_ROW, 0, NULL, (void*) &AdjustColor, NULL, NULL, Button, N_("B") },
 {    4, SAME_ROW, 0, NULL, (void*) &AdjustColor, NULL, NULL, Button, N_("D") },
 { 0,          0, 70, NULL, (void*) &appData.lightSquareColor, "", NULL, TextBox, N_("Light Square Color:") },
-{ 1000, SAME_ROW, 0, NULL, (void*) &DefColor, NULL, (char**) "#C8C365", Button, "      " },
+{ 1000, SAME_ROW, 0, NULL, (void*) &DefColor, NULL, (char**) "#C8C365", Button, " Default " },
 {    1, SAME_ROW, 0, NULL, (void*) &AdjustColor, NULL, NULL, Button, N_("R") },
 {    2, SAME_ROW, 0, NULL, (void*) &AdjustColor, NULL, NULL, Button, N_("G") },
 {    3, SAME_ROW, 0, NULL, (void*) &AdjustColor, NULL, NULL, Button, N_("B") },
 {    4, SAME_ROW, 0, NULL, (void*) &AdjustColor, NULL, NULL, Button, N_("D") },
 { 0,          0, 70, NULL, (void*) &appData.darkSquareColor, "", NULL, TextBox, N_("Dark Square Color:") },
-{ 1000, SAME_ROW, 0, NULL, (void*) &DefColor, NULL, (char**) "#77A26D", Button, "      " },
+{ 1000, SAME_ROW, 0, NULL, (void*) &DefColor, NULL, (char**) "#77A26D", Button, " Default " },
 {    1, SAME_ROW, 0, NULL, (void*) &AdjustColor, NULL, NULL, Button, N_("R") },
 {    2, SAME_ROW, 0, NULL, (void*) &AdjustColor, NULL, NULL, Button, N_("G") },
 {    3, SAME_ROW, 0, NULL, (void*) &AdjustColor, NULL, NULL, Button, N_("B") },
 {    4, SAME_ROW, 0, NULL, (void*) &AdjustColor, NULL, NULL, Button, N_("D") },
 { 0,          0, 70, NULL, (void*) &appData.highlightSquareColor, "", NULL, TextBox, N_("Highlight Color:") },
-{ 1000, SAME_ROW, 0, NULL, (void*) &DefColor, NULL, (char**) "#FFFF00", Button, "      " },
+{ 1000, SAME_ROW, 0, NULL, (void*) &DefColor, NULL, (char**) "#FFFF00", Button, " Default " },
 {    1, SAME_ROW, 0, NULL, (void*) &AdjustColor, NULL, NULL, Button, N_("R") },
 {    2, SAME_ROW, 0, NULL, (void*) &AdjustColor, NULL, NULL, Button, N_("G") },
 {    3, SAME_ROW, 0, NULL, (void*) &AdjustColor, NULL, NULL, Button, N_("B") },
 {    4, SAME_ROW, 0, NULL, (void*) &AdjustColor, NULL, NULL, Button, N_("D") },
 { 0,          0, 70, NULL, (void*) &appData.premoveHighlightColor, "", NULL, TextBox, N_("Premove Highlight Color:") },
-{ 1000, SAME_ROW, 0, NULL, (void*) &DefColor, NULL, (char**) "#FF0000", Button, "      " },
+{ 1000, SAME_ROW, 0, NULL, (void*) &DefColor, NULL, (char**) "#FF0000", Button, " Default " },
 {    1, SAME_ROW, 0, NULL, (void*) &AdjustColor, NULL, NULL, Button, N_("R") },
 {    2, SAME_ROW, 0, NULL, (void*) &AdjustColor, NULL, NULL, Button, N_("G") },
 {    3, SAME_ROW, 0, NULL, (void*) &AdjustColor, NULL, NULL, Button, N_("B") },
@@ -2302,6 +2304,7 @@ DisplayMoveError (String message)
     } else {
 	DisplayMessage(message, "");
     }
+    set_accessible_description(message,TRUE);
 }
 
 
@@ -2496,6 +2499,7 @@ Option mainOptions[] = { // description of main window in terms of generic dialo
   { 0, COMBO_CALLBACK, 0, NULL, (void*)&MenuCallback, NULL, NULL, DropDown, N_("_Action") },
   { 0, COMBO_CALLBACK, 0, NULL, (void*)&MenuCallback, NULL, NULL, DropDown, N_("E_ngine") },
   { 0, COMBO_CALLBACK, 0, NULL, (void*)&MenuCallback, NULL, NULL, DropDown, N_("_Options") },
+  { 0, COMBO_CALLBACK, 0, NULL, (void*)&MenuCallback, NULL, NULL, DropDown, N_("Accessibility") },
   { 0, COMBO_CALLBACK, 0, NULL, (void*)&MenuCallback, NULL, NULL, DropDown, N_("_Help") },
 { 0, 0, 0, NULL, (void*)&SizeKludge, "", NULL, BarEnd, "" },
 { 0, LR|T2T|BORDER|SAME_ROW, 0, NULL, NULL, NULL, NULL, Label, "1" }, // optional title in window
@@ -2516,6 +2520,7 @@ Option mainOptions[] = { // description of main window in terms of generic dialo
   { 2, COMBO_CALLBACK, 0, NULL, (void*) &PMSelect, NULL, pieceMenuStrings[0], PopUp, "menuW" },
   { 2, COMBO_CALLBACK, 0, NULL, (void*) &PMSelect, NULL, pieceMenuStrings[1], PopUp, "menuB" },
   { -1, COMBO_CALLBACK, 0, NULL, (void*) &PMSelect, NULL, dropMenuStrings, PopUp, "menuD" },
+  { 0, BORDER, 401, NULL, NULL, NULL, NULL, NotificationLabel, "Graph Notification" },
 { 0,  NO_OK, 0, NULL, NULL, "", NULL, EndMark , "" }
 };
 
@@ -2595,6 +2600,16 @@ Exp (int n, int x, int y)
 	    InitDrawingHandle(mainOptions + W_BOARD);
 	    if(sizing && SubtractTimeMarks(&now, &programStartTime) > 10000) return NULL; // don't redraw while sizing (except at startup)
 	    DrawPosition(True, NULL);
+		break;
+	case 11:
+	case 12:
+	case 13:
+	case 14:
+	case 15:
+	case 16:
+	case 17:
+	KeyNavigation(n);
+	break;
 	default:
 	    return NULL;
     }
@@ -2633,7 +2648,7 @@ BoardPopUp (int squareSize, int lineGap, void *clockFontThingy)
 	mainOptions[W_WHITE].name = mainOptions[W_BLACK].name = "Double\nHeight";
     }
     if(!appData.showButtonBar) for(i=W_BUTTON; i<W_BOARD; i++) mainOptions[i].type = Skip;
-    for(i=0; i<8; i++) mainOptions[i+1].choice = (char**) menuBar[i].mi;
+    for(i=0; i<9; i++) mainOptions[i+1].choice = (char**) menuBar[i].mi;
     AppendEnginesToMenu(appData.recentEngineList);
     GenericPopUp(mainOptions, "XBoard", BoardWindow, BoardWindow, NONMODAL, 1); // allways top-level
     return mainOptions;
@@ -3053,3 +3068,39 @@ ActivateTheme (int col)
     DrawPosition(True, NULL);
 }
 
+void set_accessible_description(char *mess, int flag)
+{ // for debug file
+	static char buf[8000], *p;
+    int l = strlen(buf);
+    
+	if(appData.debugMode) fprintf(debugFP, "Info '%s'\n", mess);
+    
+    if(l) buf[l++] = ' '; // separate by space from previous
+	
+	safeStrCpy(buf+l, _(mess), 8000-1-l); // buffer
+    if(!flag) return; // wait for flush
+	
+	if(p = StrCaseStr(buf, "Xboard adjudication:")) {
+		int i;
+		for(i=19; i>1; i--) p[i] = p[i-1];
+		p[1] = ' ';
+	}
+		
+	notify_accessible_description(&mainOptions[W_ACC_TITLE],buf);
+	
+	
+	if(appData.announceMove)
+	{
+		TTS_say(buf);
+	}
+	
+	buf[0] = NULLCHAR;	
+}
+
+
+void
+ShowAccessibilityStatusbarEvent ()
+{
+	printf("\nAccessibilityStatusbar = %d", appData.showAccessibilityStatusbar);
+	show_hide_accessibility_status_bar(&mainOptions[W_ACC_TITLE],appData.showAccessibilityStatusbar);
+}

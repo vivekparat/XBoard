@@ -65,6 +65,10 @@
 #include <cairo/cairo-xlib.h>
 #include <gtk/gtk.h>
 
+#if USING_GTK2
+#include <gdk/gdkkeysyms.h>
+#endif
+
 #if !OMIT_SOCKETS
 # if HAVE_SYS_SOCKET_H
 #  include <sys/socket.h>
@@ -1940,6 +1944,21 @@ void MoveTypeInProc(eventkey)
     if (eventkey->state & (GDK_CONTROL_MASK | GDK_MOD1_MASK | GDK_META_MASK)) {
         return;
     }
+
+
+#ifdef USING_GTK2
+    if (eventkey->keyval == GDK_Up ||
+		eventkey->keyval == GDK_Right ||
+		eventkey->keyval == GDK_Left ||
+		eventkey->keyval == GDK_Down )
+			gtk_widget_grab_focus(boardWidget);
+#else
+    if (eventkey->keyval == GDK_KEY_Up ||
+		eventkey->keyval == GDK_KEY_Right ||
+		eventkey->keyval == GDK_KEY_Left ||
+		eventkey->keyval == GDK_KEY_Down )
+			gtk_widget_grab_focus(boardWidget);
+#endif
 
     buf[0]=eventkey->keyval;
     buf[1]='\0';
