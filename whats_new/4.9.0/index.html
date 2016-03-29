@@ -1,0 +1,586 @@
+<!--#include virtual="/server/html5-header.html" -->
+<title>XBoard - GNU Project - Free Software Foundation - NEWS</title>
+<!--#include virtual="/server/banner.html" -->
+<!--#set var="article_name" value="/server/standards/boilerplate" -->
+<!--#include virtual="/server/gnun/initial-translations-list.html" -->
+
+<h2>What is new in XBoard/WinBoard 4.9.0?</h2>
+<table cellpadding="20"><tr valign="top"><td>
+
+<a href="#tag-A"><h4>New features in this release</h4></a>
+<ul><li>
+<a href="#tag-A5">Running EPD test suites</a>
+</li><li>
+<a href="#tag-A6">Getting instant help</a>
+</li><li>
+<a href="#tag-A7">Use mouse wheel to set up position</a>
+</li><li>
+<a href="#tag-A8">Allow engine to pop up its settings dialog</a>
+</li><li>
+<a href="#tag-A9">Specifying ultra-fast games</a>
+</li><li>
+<a href="#tag-A10">Installing board themes from packages</a>
+</li><li>
+<a href="#tag-A11">Using a single-button mouse</a>
+</li><li>
+<a href="#tag-A12">A special directory for start positions</a>
+</li><li>
+<a href="#tag-A13">Allow terminal-less ICS play</a>
+</li><li>
+<a href="#tag-A14">Sound warnings in analysis mode</a>
+</li></ul>
+
+</td><td>
+
+<a href="#tag-B"><h4>New variant support</h4></a>
+<ul><li>
+<a href="#tag-B1">New piece types</a>
+</li><li>
+<a href="#tag-B2">Allowing more than 26 piece types</a>
+</li><li>
+<a href="#tag-B3">More flexible piece promotion</a>
+</li><li>
+<a href="#tag-A2">Restricting promotion choice</a>
+</li><li>
+<a href="#tag-A3">New configurable move types</a>
+</li><li>
+<a href="#tag-A4">Inscribing pieces with text</a>
+</li><li>
+<a href="#tag-B4">Setting rules from the command line</a>
+</li><li>
+<a href="#tag-B5">Allow inaccessible squares</a>
+</li><li>
+<a href="#tag-B6">Load Shogi games in .kif format</a>
+
+</li></ul>
+
+</td><td>
+
+<img src="../4.5.0/winboardF.png">
+  <p>
+    <a href="../4.9.0/index.html">Follow-up</a>
+  </p>
+  <p>
+    <a href="../4.8.0/index.html">Preceding release (4.8.0)</a>
+  </p>
+  <p>
+    <a href="http://hgm.nubati.net/news.html">Experimental and future stuff</a>
+  </p>
+</td></tr></table>
+
+<a name="tag-A"><h2>The following features are new in XBoard 4.9.0:</h2></a>
+
+<img src="EPD.png" style="float:left;margin:20px">
+<h3><a name="tag-A5">EPD test suites</a></h3>
+<p>
+A new volatile option <b>-epd</b> will switch XBoard in EPD mode for the duration of the session.
+In this mode all games will be terminated after a single move.
+This move will then be compared with the best-move (bm) or avoid-move (am) fields
+from the EPD position specification from which the game started,
+and counters will be kept of the number of good and wrong solutions thus given by the engine.
+XBoard can thus be used to run an EPD test suite, through a command like
+"<b>xboard -epd -mg 100 -lpf STS1.epd -lpi -1 -fcp crafty</b>"
+to solve the first 100 test positions on the STS1.epd file with the Crafty engine
+at the default time control.
+The results of the test suite will be reported in the second pane of the Engine Output window,
+and as the 'match' result in the title bar:
+finding a correct best move will be counted as a win, playing an avoid move as a loss,
+and all other moves as draws.
+</p>
+
+<h3><a name="tag-A7">Selecting a piece with the mouse wheel</a></h3>
+<p>
+In Edit Position mode, operating the mouse wheel above a square now creates a piece in that square,
+or changes the identity of that piece, making it run through the entire set of pieces participating in the current variant.
+This is especially useful in variants with many piece types,
+where sweep selection becomes problematic due to lack of space to move the mouse.
+</p>
+
+<h3><a name="tag-A11">What if your mouse only has a single button?</a></h3>
+<p>
+Setting up a position required the right mouse button ('button 3' in Linux) to put new pieces on the board.
+The option <b>-monoMouse</b> can allow XBoard to use the left button for this.
+In that case clicking over an empty square will behave like it was a right-click,
+and will create a piece in that square.
+Clicking over an occupied square will select or grab the piece,
+as usual for left-clocks.
+</p>
+
+<h3><a name="tag-A12">Your favorite starting positions</a></h3>
+<p>
+A new option <b>-positionDir</b> can force the file-selector dialog that pops up in response to Load Position
+to start browsing in the specified directory, rather than in the current directory.
+This can be useful whan you have a fvorite set of positions from which you often start games,
+e.g. for several material-odds positions.
+</p>
+
+<img src="Help.png" style="float:right;margin:20px">
+<h3><a name="tag-A6">Clicking menus and dialog texts for instant help</a></h3>
+<p>
+All text labels in dialogs and the main pop-down menu items can now be right-clicked,
+in order to pop up a text box with the description of their function from the manual.
+The man page has been largely rewritten and re-organized to make sure most
+items produce satisfactory help this way.
+</p>
+
+<h3><a name="tag-A9">Fractions in the time-control parameters</a></h3>
+<p>
+The spin controls in the Time Control dialog of XBoard's GTK build do not allow entering non-integer values,
+which precluded setting base times like 0:30 (for 30 sec) or increments like 0.1 (sec).
+To work around that there now is a divide-by-60 checkbox in that dialog,
+which allows you to enter base times in seconds and increments in units of 1/60 seconds.
+</p>
+
+<h3><a name="tag-A8">Engine Settings on the engine's demand</a></h3>
+<p>
+It was already possible for an engine to cause pop up of a message, or a simple question.
+Now engines can modify their settings dialog after startup, and force it to pop up.
+This is triggered by the 'feature done=N' command, where a meaning has been given to new values of N.
+XBoard will now erase the engine's option list on receiving done=0,
+so that the engine can redefine the settings, or even the options itself, by resending 'feature option' commands.
+Ending such a resent option list with "feature done=1" will now cause the contents of an open settings dialog to be updated.
+Ending it with done=2 will alert XBoard that the list of options itself changed,
+and force it to close and re-open a dialog that was already open.
+Ending with done=3 will even open a redesigned dialog when no dialog was up before,
+allowing the engine to ask for attention.
+</p>
+
+<img src="Password.png" style="float:left; margin:20px">
+<h3><a name="tag-A13">Getting rid of the xterm window in ICS play</a></h3>
+<p>
+The console from which XBoard was started was historically used as text window to interact with the Internet Chess Server.
+But the ICS Chat/Console window now fulfills the same function.
+So not being able to read from or write to the terminal is no longer a fatal error,
+and XBoard can be started in ICS mode without terminal, provided the ICS Chat/Console window is open.
+This window now also hides the password you are typing,
+and prevents you from recalling it with the arrow keys.
+</p>
+
+<h3><a name="tag-A10">Auto-install of board themes</a></h3>
+<p>
+A new option <b>-installTheme</b> has been added, which can be put into XBoard's master settings file
+when installing a package with new piece images and/or board textures,
+to make a selection item for this board theme automatically appear in XBoard's themes listbox.
+This opens the possibility for easy packaging and distribution of board themes.
+</p>
+
+<h3><a name="tag-A14">Making a sound during analysis</a></h3>
+<p>
+The move sound can now also be played when a new PV arrives in Analyze mode
+(where normal moving does not take place).
+A new option <b>-analysisBell DELAY</b> can specify a DELAY in seconds,
+and any line of engine thinking output that arrives after this delay
+will cause the move sound to be played.
+Setting the value to zero will disable move sounds during analysis.
+</p>
+
+
+
+<a name="tag-B"><h2>New variant support</h2></a>
+
+<div>
+<img src="Pieces.png" style="float:right; margin:20px">
+<h3><a name="tag-B1">22 New piece types</a></h3>
+<p>
+The number of piece types in XBoard has been expanded from 44 to 66.
+The order of the pieces beyond the first 22 in the <b>-pieceToCharTable</b> option,
+which was never officially defined, (as those pieces were only used in Chu Shogi), is now established as well.
+This ordering is depicted in the image.
+XBoard distinguishes primary and secondary pieces (the latter indicated on purple background).
+To make pieceToCharTables compatible with future expansion of the number of primary pieces,
+a slash '/' in this table indicates that the pieces following it are from the secondary series
+(except for King, which is always the last piece of each color).
+These secondary pieces are assumed to be less generally useful,
+satisfying very specific needs of some Shogi variants,
+and would thus hardly be needed.
+</p><p>
+All pieces have a default image in XBoard, scalable to all square sizes.
+WinBoard, however, does not have built-in bitmaps for most unorthodox pieces
+for square sizes other than 33x33 ('petite'), 49x49 ('middling') and 72x72 ('bulky'),
+and no bitmaps for the pieces on green or purple background in any size.
+WinBoard can load images for all pieces from external bitmap files, however.
+The name of these files in the pieceImageDirectory should be
+pieceNN_SSo.bmp, pieceNN_SSs.bmp, and pieceNN_SSw.bmp, 
+(for the outline, solid and background image),
+with SS the square size (e.g. 49),
+and NN the number of the pieces in the pieceToCharTable ordering (0-65).
+Pieces shown in black in XBoard are duplicats of other pieces in the default piece theme,
+but in principle have different names for their image files,
+so that in other themes they could be different.
+(This is useful in Shogi, where the same piece sometimes has a different name written on it.)
+</p><p>
+Note that the Lance and Lion image occur on two different pieces;
+This because the pieces originally using these images have special properties in XBoard.
+The Lance is considered an alternative Pawn, and thus is assumed to promote 
+(with full promotion choice)
+when reaching last rank.
+The Lion is subject to rules that restrict its trading.
+The duplicats are added so that these pictograms can also be used for pieces not having this property.
+</p>
+</div>
+
+<h3><a name="tag-B2">Beating the alphabet</a></h3>
+
+<p>
+Some Shogi variants have (far) more than 26 piece types.
+This makes it impossible to assign a single letter as ID for the piece,
+for the purpose of writing its moves as SAN, or its occurrence in FEN.
+In XBoard this problem has now been solved by allowing pieces to be represented by 'dressed letters',
+a letter followed by a punctuation mark like an exclamation point or quote.
+So if L represents one piece, L' represents another, and L! yet another.
+In the future this could be extended with still other symbols (like L"),
+but at the moment having 3x26 = 78 possible IDs,
+still stretched more by the +L notation for promoted pieces,
+seems more than enough.
+</p>
+
+<h3><a name="tag-B3">Promoting pieces, but to what?</a></h3>
+<p>
+XBoard already supported Shogi-style promotion of pieces,
+where each piece promotes to a fixed 'partner'.
+The assignment of a promotion partner was fixed, however:
+each piece in the first 11 of the pieceToCharTable could promote to the piece 11 places further.
+This was enabled by defining the ID for the latter as '+'.
+For reasons of backward compatibility, this is still how things work by default.
+</p><p>
+But in XBoard 4.9 a piece can be indicated by multiple characters in the pieceToCharTable,
+and the combination ^L defines a piece not only as a promoted type (like '+' would),
+but also specifies it is the promoted partner of the piece with ID 'L',
+which could be any other piece in the pieceToCharTable.
+So any piece can potentially promote to any other,
+redefining the fixed pairing between pieces in the first and second group of 11.
+</p><p>
+Another novelty is that pieces can also be defined with an ID *L.
+This has the same effect as defining it as the (unpromoted) 'L',
+but in addition defines the 10th piece of the secondary series as its promoted form.
+This allows many pieces to have the same promoted form,
+(as commonly occurs in large Shogi variants),
+without the need to have multiple representations for that promoted version.
+</p>
+
+<h3><a name="tag-A2">Promotion choice, but with restrictions</a></h3>
+<p>
+XBoard assumes by default that Pawns can promote to any piece participating in the variant
+that is not a Pawn or King.
+This then is the choice the user is offered through detour or sweep promotions.
+It is left to the engine to refuse moves that would choose a non-allowed piece,
+and often the default choice (the piece obtained when not dragging the Pawn through a detour,
+or making a static click on the to-square)
+would not be the strongest piece at all.
+</p><p>
+XBoard 4.9 supports a new extension of the engine communication protocol,
+where an engine can send a 'choice' command
+in response to a 'put' or 'lift' command sent to it because the user
+performed a promoting move (to last rank, or to a square highlighted in magenta).
+This 'choice' command conveys a list of piece IDs of possible promotion choices,
+to which XBoard then will limit the choice offered to the user.
+The first mentioned piece in this list will then be the default choice.
+</p>
+
+<img src="Inscribe.png" style="float:left;margin:20px">
+<h3><a name="tag-A4">UTF8 text inscriptions on pieces</a></h3>
+<p>
+XBoard 4.9 has a new volatile option -inscriptions, which can define an UTF8 text string.
+The characters in this string correspond to pieces according to the same rules as the -pieceTCharTable option.
+Thus defined characters will then be written on top of the corresponding piece image.
+In addition there is a new 'fall-back' rule for missing piece images in a user-defined <b>-pieceImageDirectory</b>:
+XBoard will first try to find an image called White/BlackTile.svg before using the piece image from the default theme.
+</p><p>
+Together, this can be used for on-the-fly reation of Shogi themes.
+One just provides an image of a blank tile of average size as the Tile.svg image,
+and no image for all pieces that are intended to use this.
+(For pieces like Pawn and King that need different tile size, you an still include dediated images.)
+The -insrciptions argument then indicates what kanji should be written on which piece.
+The kanji are written in red when the piece was defined as a promoted one,
+and rendered upside-down for the side playing downward when pieces are flipped Shogi style.
+</p>
+
+<h3><a name="tag-A3">New move-generator capabilities</a></h3>
+<p>
+XBoard 4.9 is capable to handle moves with two 'locust captures',
+i.e. where two pieces disappear on squares other than to which the moving piece goes.
+It also adopts the convention that locust capture of an own piece on the rank where the King starts
+will be considered a castling of the capturing piece ('King analog') with the victim ('Rook analog'),
+the latter ending up next to, but on the other side of the former.
+This allows the definition of castling (through a betza 'O' atom) on non-royal pieces,
+such as the 'guarding' of (extended) Omega Chess.
+For castlings where the King moves one step this method is also used,
+to resolve the ambiguity with normal King moves.
+Castlings defined through an 'O' atom are not necessarily with the piece furthest away from the King (or other castling piece),
+but one or more 'j' prefixes on the 'O' can indicate how many squares away from the edge the castling partner is located.
+</p><p>
+Another novelty is the use of an 'ii' prefix to Pawn moves,
+indicating a move that can only be made when the Pawn is on the rank just in front of the one where it starts on.
+This can be used for the often encountered rule on 10-rank boards that Pawns can be pushed 1, 2 or 3 squares from 2nd rank,
+but still 1 or 2 squares from 3rd rank, as in Wildebeest Chess.
+The 'i' modifier has also been given a meaning for its appearence in continuation legs
+(where its meaning as move for virgin pieces only makes no sense):
+it can be used on sliding continuation legs to indicate the move has to be equally long (in basic steps)
+as the preceding sliding leg ('i' standing for 'iso').
+This allows for instance definition of slider rifle captures.
+</p>
+
+<img src="DarkSquares.png" style="float:right;margin:20px">
+<h3><a name="tag-B5">Non-rectangular boards, or boards with holes</a></h3>
+<p>
+XBoard 4.9 supports inaccessible squares, displayed in black.
+These can be used as fillers to fit non-rectangular boards in the display of XBoard.
+E.g. the Omega-Chess board with the dangling Wizard squares can be realized
+by defining a 12x12 board, and making all edge squares except the corners inaccessible.
+In FENs these inaccessible squares are indicated by asterisks '*'.
+</p>
+<p>
+In Edit Position mode you can create inaccessible squares by dragging empty squares off board,
+but you can also fill them again by moving pieces or empty squares to them.
+Clearing the board leaves the inaccessible squares as they are.
+</p>
+
+<h3><a name="tag-B4">Command-line options to redefine game rules</a></h3>
+<p>
+A new option <b>-fen</b> can define an alternative starting position
+(from which the board size will be deduced).
+This could already been done by specifying a position file through <b>-lpf</b>,
+but the <b>-fen</b> option can do it directly from the command line, without the need for a separate file.
+</p>
+<p>
+A new option <b>-men</b> can redefine moves of the pieces,
+like the VariantMen tag does in a PGN file.
+Its value can be a semicolon-separated list of piece ID : Betza move description pairs,
+like Q:KGH;B:mBcaibB.
+Both the <b>-men</b> and <b>-fen</b> options are volatile,
+and apply only as long as the New Variant dialog is not used to select a variant.
+</p>
+
+<h3><a name="tag-B6">Foreign game formats</a></h3>
+<p>
+XBoard's game parser should now understand traditional Shogi notation, as in .kif files.
+It would understand those both in UTF8 and Shift-JIS encoding.
+This allows you to directly paste Shogi games into XBoard.
+XBoard will always save games in PGN format, though.
+</p>
+
+<h3><a name="tag-C">Fixed bugs</a></h3>
+<ul>
+  <li>
+	Fix crash on using Game List Tags dialog when Game List was not up.
+  </li>
+  <li>
+	Fix Browse buttons in Tournament Options dialog.
+  </li>
+  <li>
+	Fix file-type drop-down in Xaw file-selector dialog.
+  </li>
+  <li>
+	Fix crash on pasting garbage FEN.
+  </li>
+  <li>
+	Fix crash on loading empty PGN file.
+  </li>
+  <li>
+	Fix hanging on non-existent texture file (XB).
+  </li>
+  <li>
+	Fix spurious copying instead of moving in Edit Position mode.
+  </li>
+  <li>
+	Do not delay showing book changes while editing book.
+  </li>
+  <li>
+	Fix spurious clearing of Engine Output panes when PV walking.
+  </li>
+  <li>
+	Fix remembering tourney file and (WB) ticking of auto-step boxes in Tournament Options dialog when using Continue Later.
+  </li>
+  <li>
+	Ignore Continue Later button in Tournament Options when match in progress.
+  </li>
+  <li>
+	Fix closing of Error popup from Tournament Options dialog.
+  </li>
+  <li>
+	Prevent popup of Time Control dialog during game in XBoard.
+  </li>
+  <li>
+	Improve horizontal sizing of menu bar by better clipping of the menu names.
+  </li>
+  <li>
+	Fix date measurement in -addMaster option.
+  </li>
+  <li>
+	Wait for engine when switching to Edit Game mode when first engine is thinking.
+  </li>
+  <li>
+	Fix defaulting of second engine to first when UCI flag or directory specified (XB).
+  </li>
+  <li><b>Cosmetic</b></li>
+  <li>
+	Print mate scores in #N format also in message field.
+  </li>
+  <li>
+	Fix sorting of #N mate scores in Engine Output window (where smaller N is better).
+  </li>
+  <li>
+	Show moves as SAN in Edit Book window.
+  </li>
+  <li>
+	Display exclusion header in Engine Output window only for engines that support move exclusion.
+  </li>
+  <li>
+	Gray-out Machine Match menu when match already scheduled for termination.
+  </li>
+  <li>
+	Update user logo when username is changed.
+  </li>
+  <li>
+	Prevent old logos from remaining (partially) visible when new one does not exist or has deviant format.
+  </li>
+  <li>
+	Use result mentioned in game to reconstruct missing PGN Result tag, rather than considering it 'unfinished'.
+  </li>
+  <li>
+	Fix highlight clearing in Edit Position mode.
+  </li>
+  <li>
+	Fix highlighting of last move after rejection of premove.
+  </li>
+  <li>
+	Improve pointing of highlight arrow and its erasure.
+  </li>
+  <li>
+	Fix thick border around saved diagrams (WB).
+  </li>
+  <li>
+	Ignore grabbing / selecting opponent pieces in Analyze mode.
+  </li>
+  <li><b>GTK build</b></li>
+  <li>
+	Provide OK and Cancel buttons in top-level windows (that want them) for GTK build.
+  </li>
+  <li>
+	Fix periodic updates during analysis for GTK build.
+  </li>
+  <li>
+	Fix highlighting text in Engine Output and Move History windows GTK build.
+  </li>
+  <li>
+	Repair flashing of moved piece in GTK build (flaky!).
+  </li>
+  <li>
+	Allow default context menu to appear on 'off-target' right-clicks in GTK build.
+  </li>
+  <li>
+	Define mnemonic keys for items on menu bar.
+  </li>
+  <li>
+	Remember last browsed folder per file type rather than globally in GTK build.
+  </li>
+  <li><b>OSX App</b></li>
+  <li>
+	Save settings on quitting through menu in OSX App.
+  </li>
+  <li>
+	Fix behavior on case-sensitive OS X file systems.
+  </li>
+  <li>
+	Fix creation of spurious XBoard instances on OS X.
+  </li>
+  <li><b>ICS and zippy mode</b></li>
+  <li>
+	Fix crashing of Xaw build in ICS-zippy mode when opponent kibitzes and chat window is open.
+  </li>
+  <li>
+	Fix spurious undo at start of ICS game in zippy mode imediately after previous game was resigned.
+  </li>
+  <li>
+	Fix width of secondary board (for ICS background observe) in the GTK build.
+  </li>
+  <li>
+	Logout from ICS after engine failure in zippy mode.
+  </li>
+  <li>
+	Prevent Fix bell character from being printed in ICS Console window.
+  </li>
+  <li><b>Variants</b></li>
+  <li>
+	Fix behavior of engine-defined castling moves w.r.t. board holes and King rank.
+  </li>
+  <li>
+	Fix e.p. capture of triply-pushed Pawns.
+  </li>
+  <li>
+	Fix accepting illegal drops with legality testing off.
+  </li>
+  <li>
+	Fix higlight-induced promotions (moves to squares marked purple by the engine).
+  </li>
+  <li>
+	Fix sweep-promotion problems (black Pawns in Shogi, up-clicks in from-square, spurious promotion popups).
+  </li>
+  <li>
+	Fix spurious promotion suffix on drop moves parsed after a promotion move.
+  </li>
+  <li>
+	Fix sending of spurious 'lift' command to engine on deselecting a piece.
+  </li>
+  <li>
+	Fix parsing of SAN moves for pieces with redefined moves when legality testing is off.
+  </li>
+  <li>
+	Fix pasting FENs that start with an inaccessible square.
+  </li>
+  <li>
+	The GUI book code can now handle up to 48 (unpromoted) piece types, and boards up to 256 squares.
+  </li>
+  <li>
+	Allow promotion choice in variant ASEAN (to support this rule change).
+  </li>
+  <li>
+	Fix bare-king adjudication correction for Atomic, where a bare King is beats an exploded one.
+  </li>
+  <li>
+	Fix pasting of moves immediately after starting from position file.
+  </li>
+  <li>
+	Reset old piece redefinitions when loading new game.
+  </li>
+  <li>
+	Fix setting of piece virginity from reading PGN.
+  </li>
+  <li>
+	Fix variant switching triggered by engine load.
+  </li>
+</ul>
+
+
+</div><!-- for id="content", starts in the include above -->
+<!--#include virtual="/server/footer.html" -->
+<div id="footer">
+
+<p>Please send general FSF &amp; GNU inquiries to
+<a href="mailto:gnu@gnu.org">&lt;gnu@gnu.org&gt;</a>.
+There are also <a href="/contact/">other ways to contact</a>
+the FSF.<br />
+Please send broken links and other corrections or suggestions to
+<a href="mailto:bug-xboard@gnu.org">&lt;bug-xboard@gnu.org&gt;</a>.</p>
+
+<p>Please see the <a
+href="/server/standards/README.translations.html">Translations
+README</a> for information on coordinating and submitting translations
+of this article.</p>
+
+<p>Copyright &copy; 2009, 2010, 2011, 2012, 2013, 2014, Free Software Foundation, Inc.</p>
+
+<p>This page is licensed under a <a rel="license"
+href="http://creativecommons.org/licenses/by-nd/3.0/us/">Creative
+Commons Attribution-NoDerivs 3.0 United States License</a>.</p>
+
+<p>Updated:
+<!-- timestamp start -->
+$Date: 2016/03/20 05:01:49 $
+<!-- timestamp end -->
+</p>
+</div>
+</div>
+</body>
+</html>
+
