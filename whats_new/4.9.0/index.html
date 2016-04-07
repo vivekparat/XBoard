@@ -11,27 +11,29 @@
 <ul><li>
 <a href="#tag-A5">Running EPD test suites</a>
 </li><li>
-<a href="#tag-A6">Getting instant help</a>
+<a href="#tag-A6">Getting instant help (XB)</a>
 </li><li>
-<a href="#tag-A7">Use mouse wheel to set up position</a>
+<a href="#tag-A16">Editing castling rights in a position</a>
+</li><li>
+<a href="#tag-A7">Use mouse wheel to set up position (XB)</a>
 </li><li>
 <a href="#tag-A8">Allow engine to pop up its settings dialog</a>
 </li><li>
-<a href="#tag-A9">Specifying ultra-fast games</a>
+<a href="#tag-A9">Specifying ultra-fast games (XB)</a>
 </li><li>
-<a href="#tag-A10">Installing board themes from packages</a>
+<a href="#tag-A10">Installing board themes from packages (XB)</a>
 </li><li>
 <a href="#tag-A11">Using a single-button mouse</a>
 </li><li>
 <a href="#tag-A12">A special directory for start positions</a>
 </li><li>
-<a href="#tag-A13">Allow terminal-less ICS play</a>
+<a href="#tag-A13">Allow terminal-less ICS play (XB)</a>
 </li><li>
 <a href="#tag-A14">Sound warnings in analysis mode</a>
 </li><li>
-<a href="#tag-A15">Changing fonts through the GUI</a>
+<a href="#tag-A15">Changing fonts through the GUI (XB)</a>
 </li><li>
-<a href="#tag-A16">Editing castling rights in a position</a>
+<a href="#tag-A17">Automatic adapting of fonts to board size (XB)</a>
 </li></ul>
 
 </td><td>
@@ -160,7 +162,7 @@ This window now also hides the password you are typing,
 and prevents you from recalling it with the arrow keys.
 </p>
 
-<h3><a name="tag-A13">Controlling castling and e.p. rights in Edit Position mode</a></h3>
+<h3><a name="tag-A16">Controlling castling and e.p. rights in Edit Position mode</a></h3>
 <img src="Rights.png" style="float:right; margin:20px">
 <p>
 XBoard has long since been made castling-aware, but the castling rights could only be fully controlled by pasting a FEN.
@@ -208,6 +210,31 @@ Each window type has its own font control,
 so that the user can use a monospace font in windows where columnar output is expected
 (such as the ICS Chat/Console,
 use a figurine font where mostly moves are displayed (Engine Output or Move History), etc.
+</p>
+
+<h3><a name="tag-A17">Persistent sizing and font selection in XBoard's GTK build</a></h3>
+<p>
+Sizing the window now not only affects the board part of XBoard's main window,
+but also the fonts chosen in clocks and message above the board, making the clock and message area size too.
+(Just like WinBoard has always been doing.)
+This also makes it possible to size the board much smaller than it initial size,
+as the default fonts get smaller as the board shrinks.
+This eventually makes the board look just as it would look when you would start it in the final size.
+This consistent board size is now saved in the settings file,
+so that next time you will indeed start up with almost the same board as the sized one
+(except some rounding of the square size to one of the 18 standard sizes).
+</p><p>
+For the fonts in other windows it is not so obvious that you want them to change when the board window is resized,
+although the default fonts for these windows does depend on board size.
+Therefore a more subtle algorithm is used for those:
+XBoard keeps track of whether the font used for each size is the default for that size,
+or a font that once was defined by the user through a command-line option or the Fonts dialog,
+(and possibly transfered through the settings file).
+Such non-default fonts will then be adhered to after sizing the board window
+when no explicitly specified font for the new size did exist yet.
+Meaning that you would only have to select a new font for each window once,
+after which it will be kept no matter how you size the board.
+Unless you take explicit action to select a separate font for each board size.
 </p>
 
 <h3><a name="tag-A14">Making a sound during analysis</a></h3>
