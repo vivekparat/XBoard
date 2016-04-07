@@ -30,6 +30,8 @@
 <a href="#tag-A14">Sound warnings in analysis mode</a>
 </li><li>
 <a href="#tag-A15">Changing fonts through the GUI</a>
+</li><li>
+<a href="#tag-A16">Editing castling rights in a position</a>
 </li></ul>
 
 </td><td>
@@ -158,6 +160,26 @@ This window now also hides the password you are typing,
 and prevents you from recalling it with the arrow keys.
 </p>
 
+<h3><a name="tag-A13">Controlling castling and e.p. rights in Edit Position mode</a></h3>
+<img src="Rights.png" style="float:right; margin:20px">
+<p>
+XBoard has long since been made castling-aware, but the castling rights could only be fully controlled by pasting a FEN.
+In Edit Position mode a simplistic heuristic was used to assign such rights:
+King and Rooks on their normal starting square would be assumed to not have moved.
+This is usually the case, but not always, and setting up those exceptional positions was not possible.
+And set up positions never had the right to e.p. capture.
+</p>
+<p>
+Now it has been made possible to grant or revoke castling or e.p. rights to arbitrary pieces.
+By first selecting a Rook, King or Pawn in Edit Position mode with a left-click, and then clicking it again,
+the assignment of rights to that piece will be reversed.
+The new state of the piece will be displayed in the message field,
+so you won't lose track.
+By endowing a Pawn with rights you will indicate it has just been double-pushed,
+and e.p. rights to capture it will be assigned to the position.
+Kings and Rooks created by a right-click in a square will be assumed to have rights based on the old heuristic,
+but Kings and Rooks put on their starting square by moving them there will be assumed to have moved.
+</p>
 <h3><a name="tag-A10">Auto-install of board themes</a></h3>
 <p>
 A new option <b>-installTheme</b> has been added, which can be put into XBoard's master settings file
