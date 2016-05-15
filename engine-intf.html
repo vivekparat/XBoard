@@ -1,10 +1,8 @@
-<!--#include virtual="/server/html5-header.html" -->
-<title>Chess Engine Communication Protocol</title>
-<style type="text/css">
-  .header {
-  border-top:2px solid black;
-  border-bottom:2px solid black;
-  }
+<!--#include virtual="/server/header.html" -->
+<!-- Parent-Version: 1.79 -->
+<title>Chess Engine Communication Protocol
+- GNU Project - Free Software Foundation</title>
+<style type="text/css"><!--
   .version1 { color: red;}
   .version43 { color: green;}
   .version44 { color: blue; }
@@ -15,14 +13,18 @@
   tr > td:first-child { font-weight:bold;}
   dt { font-weight:bold;}
 
-  </style>
-<!--#include virtual="/server/banner.html" -->
-<!--#set var="article_name" value="/server/standards/boilerplate" -->
+  p.authors { font-size: 1.4em; font-weight: bold; }
+  #content div.summary { margin-top: 1.2em; }
+  #content div.summary ol li { margin-top: .4em; margin-bottom: .4em; }
+  #content h3 { text-transform: uppercase; }
+  #content h4 { font-size: 1.4em !important; }
+--></style>
 <!--#include virtual="/server/gnun/initial-translations-list.html" -->
+<!--#include virtual="/server/banner.html" -->
 
 <div class="header">
-<h1>Chess Engine Communication Protocol</h1>
-<h2><a href="http://www.tim-mann.org/">Tim Mann</a> &amp; <a href="http://home.hccnet.nl/h.g.muller/winboardF.html">H.G.Muller</a></h2>
+<h2>Chess Engine Communication Protocol</h2>
+<p class="authors"><a href="http://www.tim-mann.org/">Tim Mann</a> &amp; <a href="http://home.hccnet.nl/h.g.muller/winboardF.html">H.G.Muller</a></p>
 <p>
 Version 2; implemented in xboard/WinBoard 4.2.1 and later. (Sept 3, 2009)<br />
 Changes since version 1 are indicated in <span class="version1">red</span>.<br />
@@ -31,25 +33,27 @@ Changes for WinBoard 4.4.xx are indicated in <span class="version44">blue</span>
 </p>
 </div>
 
-<ul>
-<li><a href="#1">1. Introduction</a></li>
-<li><a href="#2">2. Connection</a></li>
-<li><a href="#3">3. Debugging</a></li>
-<li><a href="#4">4. How it got this way</a></li>
-<li><a href="#5">5. WinBoard requires Win32 engines</a></li>
-<li><a href="#6">6. Hints on input/output</a></li>
-<li><a href="#7">7. Signals</a></li>
-<li><a href="#8">8. Commands from xboard to the engine</a></li>
-<li><a href="#9">9. Commands from the engine to xboard</a></li>
-<li><a href="#10">10. Thinking Output</a></li>
-<li><a href="#11">11. Time control</a></li>
-<li><a href="#12">12. Analyze Mode</a></li>
-<li><a href="#13">13. Idioms and backward compatibility features</a></li>
-</ul>
-
 <hr />
+<div class="summary">
+<ol>
+<li><a href="#1">Introduction</a></li>
+<li><a href="#2">Connection</a></li>
+<li><a href="#3">Debugging</a></li>
+<li><a href="#4">How it got this way</a></li>
+<li><a href="#5">WinBoard requires Win32 engines</a></li>
+<li><a href="#6">Hints on input/output</a></li>
+<li><a href="#7">Signals</a></li>
+<li><a href="#8">Commands from xboard to the engine</a></li>
+<li><a href="#9">Commands from the engine to xboard</a></li>
+<li><a href="#10">Thinking Output</a></li>
+<li><a href="#11">Time control</a></li>
+<li><a href="#12">Analyze Mode</a></li>
+<li><a href="#13">Idioms and backward compatibility features</a></li>
+</ol>
+<hr  class="no-display" />
+</div>
 
-<h2><a name="1">1. Introduction</a></h2>
+<h3><a name="1">1. Introduction</a></h3>
 
 <p>
 This document is a set of rough notes on the protocol that xboard and
@@ -102,7 +106,7 @@ report them in the appropriate section of the
 <a href="http://www.open-aurec.com/wbforum/">WinBoard forum</a>.
 </p>
 
-<h2><a name="2">2. Connection</a></h2>
+<h3><a name="2">2. Connection</a></h3>
 
 <p>
 An xboard chess engine runs as a separate process from xboard itself,
@@ -126,7 +130,7 @@ standard input and writes to its standard output.  See sections
 <a href="#5">5</a> and <a href="#6">6</a> below for additional details.
 </p>
 
-<h2><a name="3">3. Debugging</a></h2>
+<h3><a name="3">3. Debugging</a></h3>
 
 <p>
 To diagnose problems in your engine's interaction with xboard, use the
@@ -152,7 +156,7 @@ Ctrl+Alt is used in place of Alt; this had to be changed due to a conflict
 with typing the @-sign on some European keyboards.
 </p>
 
-<h2><a name="4">4. How it got this way</a></h2>
+<h3><a name="4">4. How it got this way</a></h3>
 
 <p>
 Originally, xboard was just trying to talk to the existing
@@ -215,7 +219,7 @@ of having engines dump debug messages on WinBoard in an unprotected way,
 as usually you get away with that.
 </p>
 
-<h2><a name="5">5. WinBoard requires Win32 engines</a></h2>
+<h3><a name="5">5. WinBoard requires Win32 engines</a></h3>
 
 <p>
 Due to some Microsoft brain damage that I don't understand, WinBoard
@@ -234,7 +238,7 @@ some <a href="http://www.tim-mann.org/winboard/delphi.txt" >sample
 code</a> that should help you get started.
 </p>
 
-<h2><a name="6">6. Hints on input/output</a></h2>
+<h3><a name="6">6. Hints on input/output</a></h3>
 
 <p>
 Beware of using buffered I/O in your chess engine.  The C stdio
@@ -358,7 +362,7 @@ timestamp and FICS timeseal use threads to handle multiple input
 sources.
 </p>
 
-<h2><a name="7">7. Signals</a></h2>
+<h3><a name="7">7. Signals</a></h3>
 
 <p>Engines that run on Unix need to be concerned with two Unix
 signals: <tt>SIGTERM</tt> and <tt>SIGINT</tt>.  This applies both to
@@ -420,7 +424,7 @@ under the assumption that only console applications, not windowed
 applications, would ever want to send a <tt>CTRL_C_EVENT</tt>.
 </p>
 
-<h2><a name="8">8. Commands from xboard to the engine</a></h2>
+<h3><a name="8">8. Commands from xboard to the engine</a></h3>
 
 <p>
 All commands from xboard to the engine end with a newline (\n), even
@@ -501,9 +505,9 @@ Remove any search depth limit previously set by the sd command.
 </dd>
 
 <dt>variant VARNAME</dt>
-<dd>If the game is not standard chess, but a variant, this command is
+<dd><p>If the game is not standard chess, but a variant, this command is
 sent after "new" and before the first move or "edit" command.  Currently
-defined variant names are:
+defined variant names are:</p>
 
 <table>
 <tr><td>wildcastle</td><td>Shuffle chess where king can castle from d file</td></tr>
@@ -1143,7 +1147,7 @@ These commands will only be sent to engines that have requested such through the
 </dd>
 </dl>
 
-<h3>Bughouse commands:</h3>
+<h4>Bughouse commands:</h4>
 
 <p>
 xboard now supports bughouse engines when in Zippy mode.  See
@@ -1178,7 +1182,7 @@ be added in the future.
   &lt;color&gt; acquired &lt;piece&gt;.   Example: <pre>holding [PPPRQ] [R] BR</pre></dd>
 </dl>
 
-<h2><a name="9">9. Commands from the engine to xboard</a></h2>
+<h3><a name="9">9. Commands from the engine to xboard</a></h3>
 
 <p class="version1">
 In general, an engine should not send any output to xboard that is not
@@ -1542,7 +1546,6 @@ in this case, you must set done=1 before xboard will enter normal operation.
 </dd>
 </dl>
 </dd>
-</p>
 
 <dt>Illegal move: MOVE</dt>
 <dt>Illegal move (REASON): MOVE</dt>
@@ -1768,9 +1771,11 @@ If the engine has set feature debug=1,
 it is guaranteed that WinBoard (and any future version of it) will completely ignore
 these lines in any other respect.
 </dd>
+</dl>
 
-<h3>Commands to configure the GUI for arbitrary Chess variants:</h3>
+<h4>Commands to configure the GUI for arbitrary Chess variants:</h4>
 
+<dl>
 <dt class="version47">setup FEN</dt>
 <dt class="version47">setup (PIECETOCHAR) FEN</dt>
 <dt class="version47">setup (PIECETOCHAR) WxH+S_PARENTVARIANT FEN</dt>
@@ -1802,11 +1807,11 @@ about which the GUI is not supposed to know anything at all.
 The engine can then specify board size, participating pieces, initial setup,
 and other rule details (inherited from the parent variant),
 saving the user the trouble to configure the GUI for this non-standard variant.
-Example:
+Example:</p>
 <pre>
   setup (PN.RQKpn.rqk) 6x6+0_fairy rnqknr/pppppp/6/6/PPPPPP/RNQKNR w - - 0 1
 </pre>
-could be used by an engine for Los-Alamos Chess in response to 'variant losalamos',
+<p>could be used by an engine for Los-Alamos Chess in response to 'variant losalamos',
 and would automatically switch the GUI to this variant as soon as the user
 selected it from the GUI menu.
 The PIECETOCHAR element would ensure a Bishop would not be accepted as promotion choice.
@@ -1819,7 +1824,7 @@ in response to a variant command, in order to specify that the piece
 indicated by ID moves in a non-standard way in this variant.
 (This to enable the GUI to reliably perform mate detection, and produce good SAN.)
 Like in FEN the ID is a case-sensitive letter, specifying the color.
-When it is a capital suffixed by &, the description is valid for both colors.
+When it is a capital suffixed by &amp;, the description is valid for both colors.
 PIECEDESC describes the moves in '<a href="Betza.html">Betza notation</a>',
 basically a concatenation of one-letter (upper-case) codes for all of its moves.
 These codes can be prefixed with lower-case 'modifiers' to indicate directional sub-sets
@@ -1833,24 +1838,23 @@ the move can be repeated in the same direction,
 to indicate sliders / riders (with the convention 0 = infinite).
 </span>
 </dd>
-</p>
 
 <dt class="version48">highlight COLORFEN</dt>
 <dd class="version48">
-Through this command the engine can apply markers to the board squares,
+<p>Through this command the engine can apply markers to the board squares,
 of the same type as the GUI uses for indicating where the user could put down a piece he grabs.
 The COLORFEN is a construct similar to the board part of a FEN,
 in which the letters indicate colors rather than piece types.
 Eight colors are available, through the single-letter codes: RYGCBMWD,
 for red, yellow, green, cyan, blue, magenta, white, black ('dark'), respectively.
 For example, "highlight 8/8/8/8/4y3/4yr2/8/8" would mark e3 and e4 yellow, and f3 red.
-Some colors have special meaning to the GUI:
+Some colors have special meaning to the GUI:</p>
 <table>
-<tr><th>color</th><th>used for</th><th>effect</th><tr>
-<tr><td>red</td><td>capture</td><td>hovering over the square makes the GUI send a "hover" command</td><tr>
-<tr><td>magenta</td><td>promotion</td><td>moving to the square will be treated by the GUI as a promotion</td><tr>
-<tr><td>cyan</td><td>multi-move</td><td>moving to the square will not complete the move entry</td><tr>
-<tr><td>green</td><td>victims</td><td>no real effect, but used by convention to indicate capture victims for the latest "hover"</td><tr>
+<tr><th>color</th><th>used for</th><th>effect</th></tr>
+<tr><td>red</td><td>capture</td><td>hovering over the square makes the GUI send a "hover" command</td></tr>
+<tr><td>magenta</td><td>promotion</td><td>moving to the square will be treated by the GUI as a promotion</td></tr>
+<tr><td>cyan</td><td>multi-move</td><td>moving to the square will not complete the move entry</td></tr>
+<tr><td>green</td><td>victims</td><td>no real effect, but used by convention to indicate capture victims for the latest "hover"</td></tr>
 </table>
 The GUI will use the markers for legality checking,
 and will consider moves to squares left non-marked in a highlight command as illegal even when legality checking is off.
@@ -1873,7 +1877,7 @@ It can also be used to implement side effects of the move the GUI would not know
 </dd>
 </dl>
 
-<h2><a name="10">10. Thinking Output</a></h2>
+<h3><a name="10">10. Thinking Output</a></h3>
 
 <p>
 If the user asks your engine to "show thinking", xboard sends your
@@ -2008,7 +2012,7 @@ from the thinking lines <em>if and only if</em> it sends xboard the move in
 the usual "Hint: xxx" format before sending the first line.
 </p>
 
-<h2><a name="11">11. Time control</a></h2>
+<h3><a name="11">11. Time control</a></h3>
 
 <p>
 xboard supports three styles of time control: conventional chess clocks,
@@ -2131,7 +2135,7 @@ This means that each move must be made in at most 30 seconds.  Time not used
 on one move does not accumulate for use on later moves.
 </p>
 
-<h2><a name="12">12. Analyze Mode</a></h2>
+<h3><a name="12">12. Analyze Mode</a></h3>
 
 <p>xboard supports analyzing fresh games, edited positions, and games
 from files.  However, all of these look the same from the chess
@@ -2228,7 +2232,7 @@ else to say "Okay, I'm not failing high/low anymore."  xboard will
 figure this out itself.
 </p>
 
-<h2><a name="13">13. Idioms and backward compatibility features</a></h2>
+<h3><a name="13">13. Idioms and backward compatibility features</a></h3>
 
 <p>
 Some engines have variant interpretations of the force/go/white/black,
@@ -2442,28 +2446,48 @@ patch to correct this should be available from The Learning Company
 </div><!-- for id="content", starts in the include above -->
 <!--#include virtual="/server/footer.html" -->
 <div id="footer">
+<div class="unprintable">
 
 <p>Please send general FSF &amp; GNU inquiries to
 <a href="mailto:gnu@gnu.org">&lt;gnu@gnu.org&gt;</a>.
 There are also <a href="/contact/">other ways to contact</a>
-the FSF.<br />
-Please send broken links and other corrections or suggestions to
-<a href="mailto:bug-xboard@gnu.org">&lt;bug-xboard@gnu.org&gt;</a>.</p>
+the FSF.  Broken links and other corrections or suggestions can be sent
+to <a href="mailto:bug-xboard@gnu.org">&lt;bug-xboard@gnu.org&gt;</a>.</p>
 
 <p>Please see the <a
 href="/server/standards/README.translations.html">Translations
 README</a> for information on coordinating and submitting translations
 of this article.</p>
+</div>
 
-<p>Copyright &copy; 2009, 2010, 2011, 2012 Free Software Foundation, Inc.</p>
+<!-- Regarding copyright, in general, standalone pages (as opposed to
+     files generated as part of manuals) on the GNU web server should
+     be under CC BY-ND 4.0.  Please do NOT change or remove this
+     without talking with the webmasters or licensing team first.
+     Please make sure the copyright date is consistent with the
+     document.  For web pages, it is ok to list just the latest year the
+     document was modified, or published.
+
+     If you wish to list earlier years, that is ok too.
+     Either "2001, 2002, 2003" or "2001-2003" are ok for specifying
+     years, as long as each year in the range is in fact a copyrightable
+     year, i.e., a year in which the document was published (including
+     being publicly visible on the web or in a revision control system).
+
+     There is more detail about copyright years in the GNU Maintainers
+     Information document, www.gnu.org/prep/maintain. -->
+
+<p>Copyright &copy; 2009, 2010, 2011, 2012, 2016 Free Software Foundation, Inc.</p>
 
 <p>This page is licensed under a <a rel="license"
-href="http://creativecommons.org/licenses/by-nd/3.0/us/">Creative
-Commons Attribution-NoDerivs 3.0 United States License</a>.</p>
+href="http://creativecommons.org/licenses/by-nd/4.0/">Creative
+Commons Attribution-NoDerivatives 4.0 International License</a>.</p>
 
-<p>Updated:
+<!--#include virtual="/server/bottom-notes.html" -->
+
+<p class="unprintable">Updated:
 <!-- timestamp start -->
-$Date: 2014/10/18 05:14:07 $
+$Date: 2016/05/15 17:44:19 $
 <!-- timestamp end -->
 </p>
 </div>
