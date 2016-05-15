@@ -34,6 +34,10 @@
 <a href="#tag-A15">Changing fonts through the GUI (XB)</a>
 </li><li>
 <a href="#tag-A17">Automatic adapting of fonts to board size (XB)</a>
+</li><li>
+<a href="#tag-A18">Instant preview of the board theme (XB)</a>
+</li><li>
+<a href="#tag-A19">Editing theme list or ICS text menu (XB)</a>
 </li></ul>
 
 </td><td>
@@ -245,6 +249,46 @@ A new option <b>-analysisBell DELAY</b> can specify a DELAY in seconds,
 and any line of engine thinking output that arrives after this delay
 will cause the move sound to be played.
 Setting the value to zero will disable move sounds during analysis.
+</p>
+
+<img src="Places.png" style="float:left; margin:20px">
+
+<h3><a name="tag-A18">Preview of board and pieces while browsing</a></h3>
+<p>
+The GTK file chooser has been streamlined a bit.
+To easily reach the piece images and board textures that are installed with XBoard's standard packages,
+which keep their files in cumbersome-to-reach places like /usr/local/share/games/xboard/themes
+the directories 'textures', 'themes' (for piece themes) and 'xboard' (for other data files)
+have been added to the 'Places' list at the left side of the file chooser.
+In addition, textures or piece themes that you select there
+(by single as well as double clicking)
+will be applied instantly to the board for a 'preview'.
+This allows you to judge them in the context they would be used.
+When you would finally decide not to use them after all,
+by selecting another, or leaving the file chooser or Board dialog by pressing 'Cancel',
+the board will revert to the original color and pieces.
+So at all times you can be aware of exactly what you are OK-ing through the Board dialog.
+(But... be sure the popup dialogs do not cover the board!)
+</p>
+
+<h3><a name="tag-A19">Tailoring board themes and the ICS Test Menu</a></h3>
+<p>
+The Board dialog allows you to add the current combination of graphics settings
+(colors, textures, piece images)
+to the list of predefined themes.
+Occasionally you would want to fine-tune that list to your needs, however.
+E.g. deleting themes you got tired of, re-ordering them,
+or perhaps organize them as collapsable groups by adding "# GROUPNAME" and "# end" tags in the list.
+Or add options to the theme not normally included,
+or on the contrary remove options you don't want affected,
+e.g. to create themes that only affect the board and not the pieces.
+So far this could only be done by editing your settings file (the -themeNames option in it).
+But now XBoard has a menu item to pop up a general-purpose edit window for this.
+</p><p>
+A similar Edit window can be called up by another menu item,
+to alter the ICS Text Menu, stored in the settings file as the -icsMenu option.
+This makes it a lot easier to add new buttons to it
+(or delete the buttons you never use).
 </p>
 
 
@@ -649,7 +693,7 @@ Commons Attribution-NoDerivs 3.0 United States License</a>.</p>
 
 <p>Updated:
 <!-- timestamp start -->
-$Date: 2016/05/15 17:42:59 $
+$Date: 2016/05/15 17:43:13 $
 <!-- timestamp end -->
 </p>
 </div>
