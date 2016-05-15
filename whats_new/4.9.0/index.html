@@ -28,6 +28,8 @@
 <a href="#tag-A13">Allow terminal-less ICS play</a>
 </li><li>
 <a href="#tag-A14">Sound warnings in analysis mode</a>
+</li><li>
+<a href="#tag-A15">Changing fonts through the GUI</a>
 </li></ul>
 
 </td><td>
@@ -162,6 +164,28 @@ A new option <b>-installTheme</b> has been added, which can be put into XBoard's
 when installing a package with new piece images and/or board textures,
 to make a selection item for this board theme automatically appear in XBoard's themes listbox.
 This opens the possibility for easy packaging and distribution of board themes.
+</p>
+
+<img src="Fonts.png" style="float:left; margin:20px">
+
+<h3><a name="tag-A15">A dialog to alter XBoard's font settings interactively</a></h3>
+<p>
+In the GTK build fonts have names that can be handled by mortals, like "Sans Bold 10"
+for a 10-point bold sans-serif font.
+It has thus become sensible to set them through a dialog.
+(In WinBoard this has of course been long since possible.)
+XBoard's new Fonts dialog allows you to type the name of a pango font in a text edit,
+or operate four buttons:
+to increase or decrease the point size,
+or to toggle the 'bold' or 'italic' font attributes.
+Operating the buttons changes the font name in the preceding text edit accordingly,
+and actually displays that name in the font it represents,
+so the user has a preview of what he is doing.
+</p><p>
+Each window type has its own font control,
+so that the user can use a monospace font in windows where columnar output is expected
+(such as the ICS Chat/Console,
+use a figurine font where mostly moves are displayed (Engine Output or Move History), etc.
 </p>
 
 <h3><a name="tag-A14">Making a sound during analysis</a></h3>
@@ -576,7 +600,7 @@ Commons Attribution-NoDerivs 3.0 United States License</a>.</p>
 
 <p>Updated:
 <!-- timestamp start -->
-$Date: 2016/05/15 17:41:04 $
+$Date: 2016/05/15 17:42:16 $
 <!-- timestamp end -->
 </p>
 </div>
