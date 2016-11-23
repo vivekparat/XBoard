@@ -2292,7 +2292,7 @@ InputSourceRef AddInputSource(pr, lineByLine, func, closure)
 
     channel = g_io_channel_unix_new(is->fd);
     g_io_channel_set_close_on_unref (channel, TRUE);
-    is->sid = g_io_add_watch(channel, G_IO_IN,(GIOFunc) DoInputCallback, is);
+    is->sid = g_io_add_watch(channel, G_IO_IN|G_IO_HUP,(GIOFunc) DoInputCallback, is);
 
     is->closure = closure;
     return (InputSourceRef) is;
