@@ -1600,6 +1600,7 @@ InitBackEnd3 P((void))
     char buf[MSG_SIZ];
     int err, len;
 
+    ParseFeatures(appData.features[0], &first);
     if(!appData.icsActive && !appData.noChessProgram && !appData.matchMode &&                         // mode involves only first engine
        !strcmp(appData.variant, "normal") &&                                                          // no explicit variant request
         appData.NrRanks == -1 && appData.NrFiles == -1 && appData.holdingsSize == -1 &&               // no size overrides requested
