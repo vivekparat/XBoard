@@ -10213,14 +10213,14 @@ ParseGameHistory (char *game)
 void
 ApplyMove (int fromX, int fromY, int toX, int toY, int promoChar, Board board)
 {
-  ChessSquare captured = board[toY][toX], piece, pawn, king, killed, killed2; int p, rookX, oldEP, epRank, berolina = 0;
+  ChessSquare captured = board[toY][toX], piece, pawn, king, killed, killed2; int p, rookX, oldEP, epRank, epFile, berolina = 0;
   int promoRank = gameInfo.variant == VariantMakruk || gameInfo.variant == VariantGrand || gameInfo.variant == VariantChuChess ? 3 : 1;
 
     /* [HGM] compute & store e.p. status and castling rights for new position */
     /* we can always do that 'in place', now pointers to these rights are passed to ApplyMove */
 
       if(gameInfo.variant == VariantBerolina) berolina = EP_BEROLIN_A;
-      oldEP = (signed char)board[EP_FILE]; epRank = board[EP_RANK];
+      oldEP = (signed char)board[EP_FILE]; epRank = board[EP_RANK]; epFile = board[EP_FILE];
       board[EP_STATUS] = EP_NONE;
       board[EP_FILE] = board[EP_RANK] = 100;
 
@@ -10254,6 +10254,13 @@ ApplyMove (int fromX, int fromY, int toX, int toY, int promoChar, Board board)
       }
 
       pawn = board[fromY][fromX];
+      if(pieceDesc[pawn] && strchr(pieceDesc[pawn], 'e')) { // piece with user-defined e.p. capture
+	if(captured == EmptySquare && toX == epFile && (toY == (epRank & 127) || toY + (pawn < BlackPawn ? -1 : 1) == epRank - 128)) {
+	    captured = board[epRank + (pawn < BlackPawn ? -1 : 1)][oldEP & berolina-1]; // remove victim
+	    board[epRank + (pawn < BlackPawn ? -1 : 1)][oldEP & berolina-1] = EmptySquare;
+	    pawn = EmptySquare; // kludge to suppress old e.p. code
+	}
+      }
       if( pawn == WhiteLance || pawn == BlackLance ) {
            if( gameInfo.variant != VariantSuper && gameInfo.variant != VariantChu ) {
                if(gameInfo.variant == VariantSpartan) board[EP_STATUS] = EP_PAWN_MOVE; // in Spartan no e.p. rights must be set
