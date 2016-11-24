@@ -10213,16 +10213,16 @@ ParseGameHistory (char *game)
 void
 ApplyMove (int fromX, int fromY, int toX, int toY, int promoChar, Board board)
 {
-  ChessSquare captured = board[toY][toX], piece, pawn, king, killed, killed2; int p, rookX, oldEP, epRank, epFile, berolina = 0;
+  ChessSquare captured = board[toY][toX], piece, pawn, king, killed, killed2; int p, rookX, oldEP, epRank, epFile, lastFile, lastRank, berolina = 0;
   int promoRank = gameInfo.variant == VariantMakruk || gameInfo.variant == VariantGrand || gameInfo.variant == VariantChuChess ? 3 : 1;
 
     /* [HGM] compute & store e.p. status and castling rights for new position */
     /* we can always do that 'in place', now pointers to these rights are passed to ApplyMove */
 
       if(gameInfo.variant == VariantBerolina) berolina = EP_BEROLIN_A;
-      oldEP = (signed char)board[EP_FILE]; epRank = board[EP_RANK]; epFile = board[EP_FILE];
+      oldEP = (signed char)board[EP_STATUS]; epRank = board[EP_RANK]; epFile = board[EP_FILE]; lastFile = board[LAST_FILE],lastRank = board[LAST_RANK];
       board[EP_STATUS] = EP_NONE;
-      board[EP_FILE] = board[EP_RANK] = 100;
+      board[EP_FILE] = board[EP_RANK] = board[LAST_FILE] = board[LAST_RANK] = 100;
 
   if (fromY == DROP_RANK) {
 	/* must be first */
@@ -10256,8 +10256,8 @@ ApplyMove (int fromX, int fromY, int toX, int toY, int promoChar, Board board)
       pawn = board[fromY][fromX];
       if(pieceDesc[pawn] && strchr(pieceDesc[pawn], 'e')) { // piece with user-defined e.p. capture
 	if(captured == EmptySquare && toX == epFile && (toY == (epRank & 127) || toY + (pawn < BlackPawn ? -1 : 1) == epRank - 128)) {
-	    captured = board[epRank + (pawn < BlackPawn ? -1 : 1)][oldEP & berolina-1]; // remove victim
-	    board[epRank + (pawn < BlackPawn ? -1 : 1)][oldEP & berolina-1] = EmptySquare;
+	    captured = board[lastRank][lastFile]; // remove victim
+	    board[lastRank][lastFile] = EmptySquare;
 	    pawn = EmptySquare; // kludge to suppress old e.p. code
 	}
       }
@@ -10278,6 +10278,7 @@ ApplyMove (int fromX, int fromY, int toX, int toY, int promoChar, Board board)
                if(toX<BOARD_RGHT-1 && board[toY][toX+1] == BlackPawn &&
 			gameInfo.variant != VariantBerolina || toX > fromX)
 	              board[EP_STATUS] = toX;
+	       board[LAST_FILE] = toX; board[LAST_RANK] = toY;
 	   }
       } else
       if( pawn == BlackPawn ) {
@@ -10291,6 +10292,7 @@ ApplyMove (int fromX, int fromY, int toX, int toY, int promoChar, Board board)
                if(toX<BOARD_RGHT-1 && board[toY][toX+1] == WhitePawn &&
 			gameInfo.variant != VariantBerolina || toX > fromX)
 	              board[EP_STATUS] = toX;
+	       board[LAST_FILE] = toX; board[LAST_RANK] = toY;
 	   }
        }
 
@@ -10385,18 +10387,16 @@ ApplyMove (int fromX, int fromY, int toX, int toY, int promoChar, Board board)
             board[toY][toX] = (ChessSquare) (PROMOTED(board[toY][toX]));
 	board[fromY][fromX] = EmptySquare;
     } else if ((fromY >= BOARD_HEIGHT>>1)
-	       && (oldEP == toX || oldEP == EP_UNKNOWN || appData.testLegality || abs(toX - fromX) > 4)
+	       && (epFile == toX || oldEP == EP_UNKNOWN || appData.testLegality || abs(toX - fromX) > 4)
 	       && (toX != fromX)
                && gameInfo.variant != VariantXiangqi
                && gameInfo.variant != VariantBerolina
 	       && (pawn == WhitePawn)
 	       && (board[toY][toX] == EmptySquare)) {
+	if(lastFile == 100) lastFile = (board[fromY][toX] == BlackPawn ? toX : fromX), lastRank = fromY; // assume FIDE e.p. if victim present
 	board[fromY][fromX] = EmptySquare;
 	board[toY][toX] = piece;
-	if(toY == epRank - 128 + 1)
-	    captured = board[toY - 2][toX], board[toY - 2][toX] = EmptySquare;
-	else
-	    captured = board[toY - 1][toX], board[toY - 1][toX] = EmptySquare;
+	captured = board[lastRank][lastFile], board[lastRank][lastFile] = EmptySquare;
     } else if ((fromY == BOARD_HEIGHT-4)
 	       && (toX == fromX)
                && gameInfo.variant == VariantBerolina
@@ -10452,18 +10452,16 @@ ApplyMove (int fromX, int fromY, int toX, int toY, int promoChar, Board board)
             board[toY][toX] = (ChessSquare) (PROMOTED(board[toY][toX]));
 	board[fromY][fromX] = EmptySquare;
     } else if ((fromY < BOARD_HEIGHT>>1)
-	       && (oldEP == toX || oldEP == EP_UNKNOWN || appData.testLegality || abs(toX - fromX) > 4)
+	       && (epFile == toX && epRank == toY || oldEP == EP_UNKNOWN || appData.testLegality || abs(toX - fromX) > 4)
 	       && (toX != fromX)
                && gameInfo.variant != VariantXiangqi
                && gameInfo.variant != VariantBerolina
 	       && (pawn == BlackPawn)
 	       && (board[toY][toX] == EmptySquare)) {
+	if(lastFile == 100) lastFile = (board[fromY][toX] == WhitePawn ? toX : fromX), lastRank = fromY;
 	board[fromY][fromX] = EmptySquare;
 	board[toY][toX] = piece;
-	if(toY == epRank - 128 - 1)
-	    captured = board[toY + 2][toX], board[toY + 2][toX] = EmptySquare;
-	else
-	    captured = board[toY + 1][toX], board[toY + 1][toX] = EmptySquare;
+	captured = board[lastRank][lastFile], board[lastRank][lastFile] = EmptySquare;
     } else if ((fromY == 3)
 	       && (toX == fromX)
                && gameInfo.variant == VariantBerolina

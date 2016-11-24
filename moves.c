@@ -809,9 +809,10 @@ GenPseudoLegal (Board board, int flags, MoveCallback callback, VOIDSTAR closure,
 			       rf, ff, rf + 1, ff + s, closure);
 		  }
 		  if (rf >= BOARD_HEIGHT+1>>1) {// [HGM] grand: 4th & 5th rank on 10-board
+		      int victimFile = (board[LAST_FILE] == 100 ? ff + s : board[LAST_FILE]);
                       if (ff + s >= BOARD_LEFT && ff + s < BOARD_RGHT &&
-			  (epfile == ff + s || epfile == EP_UNKNOWN) && rf < BOARD_HEIGHT-3 &&
-                          board[rf][ff + s] == BlackPawn &&
+			  (board[EP_FILE] == ff + s || epfile == EP_UNKNOWN) && rf < BOARD_HEIGHT-3 &&
+                          (board[rf][victimFile] == BlackPawn || board[rf][victimFile] == BlackLance) &&
                           board[rf+1][ff + s] == EmptySquare) {
 			  callback(board, flags, WhiteCapturesEnPassant,
 				   rf, ff, rf+1, ff + s, closure);
@@ -859,9 +860,10 @@ GenPseudoLegal (Board board, int flags, MoveCallback callback, VOIDSTAR closure,
 			       rf, ff, rf - 1, ff + s, closure);
 		  }
 		  if (rf < BOARD_HEIGHT>>1) {
+		      int victimFile = (board[LAST_FILE] == 100 ? ff + s : board[LAST_FILE]);
                       if (ff + s >= BOARD_LEFT && ff + s < BOARD_RGHT &&
-			  (epfile == ff + s || epfile == EP_UNKNOWN) && rf > 2 &&
-			  board[rf][ff + s] == WhitePawn &&
+			  (board[EP_FILE] == ff + s || epfile == EP_UNKNOWN) && rf > 2 &&
+			  (board[rf][victimFile] == WhitePawn || board[rf][victimFile] == WhiteLance) &&
 			  board[rf-1][ff + s] == EmptySquare) {
 			  callback(board, flags, BlackCapturesEnPassant,
 				   rf, ff, rf-1, ff + s, closure);
