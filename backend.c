@@ -15032,7 +15032,7 @@ WaitForEngine (ChessProgramState *cps, DelayedEventCallback retry)
 void
 TwoMachinesEvent P((void))
 {
-    int i;
+    int i, move = forwardMostMove;
     char buf[MSG_SIZ];
     ChessProgramState *onmove;
     char *bookHit = NULL;
@@ -15149,8 +15149,8 @@ TwoMachinesEvent P((void))
     }
   }
 
-    ResetClocks();
-    if (!first.sendTime || !second.sendTime) {
+    if (!first.sendTime || !second.sendTime || move == 0) { // [HGM] first engine changed sides from Reset, so recalc time odds
+	ResetClocks();
 	timeRemaining[0][forwardMostMove] = whiteTimeRemaining;
 	timeRemaining[1][forwardMostMove] = blackTimeRemaining;
     }
