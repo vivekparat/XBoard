@@ -17176,8 +17176,10 @@ StringFeature (char **p, char *name, char **loc, ChessProgramState *cps)
   if (strncmp((*p), name, len) == 0
       && (*p)[len] == '=' && (*p)[len+1] == '\"') {
     (*p) += len + 2;
-    ASSIGN(*loc, *p); // kludge alert: assign rest of line just to be sure allocation is large enough so that sscanf below always fits
-    sscanf(*p, "%[^\"]", *loc);
+    len = strlen(*p) + 1; if(len < MSG_SIZ && !strcmp(name, "option")) len = MSG_SIZ; // make sure string options have enough space to change their value
+    FREE(*loc); *loc = malloc(len);
+    strncpy(*loc, *p, len);
+    sscanf(*p, "%[^\"]", *loc); // should always fit, because we allocated at least strlen(*p)
     while (**p && **p != '\"') (*p)++;
     if (**p == '\"') (*p)++;
     snprintf(buf, MSG_SIZ, "accepted %s\n", name);
