@@ -10935,23 +10935,27 @@ ResendOptions (ChessProgramState *cps)
   char buf[MSG_SIZ];
   Option *opt = cps->option;
   for(i=0; i<cps->nrOptions; i++, opt++) {
+      *buf = NULLCHAR;
       switch(opt->type) {
         case Spin:
         case Slider:
         case CheckBox:
+	    if(opt->value != *(int*) (opt->name + MSG_SIZ - 104))
 	    snprintf(buf, MSG_SIZ, "option %s=%d\n", opt->name, opt->value);
           break;
         case ComboBox:
-          snprintf(buf, MSG_SIZ, "option %s=%s\n", opt->name, opt->choice[opt->value]);
+	    if(opt->value != *(int*) (opt->name + MSG_SIZ - 104))
+            snprintf(buf, MSG_SIZ, "option %s=%s\n", opt->name, opt->choice[opt->value]);
           break;
         default:
+	    if(strcmp(opt->textValue, opt->name + MSG_SIZ - 100))
 	    snprintf(buf, MSG_SIZ, "option %s=%s\n", opt->name, opt->textValue);
           break;
         case Button:
         case SaveButton:
           continue;
       }
-      SendToProgram(buf, cps);
+      if(*buf) SendToProgram(buf, cps);
   }
 }
 
@@ -17281,6 +17285,8 @@ ParseOption (Option *opt, ChessProgramState *cps)
 		strcat(buf, "\n");
 		SendToProgram(buf, cps);
 	}
+	*(int*) (opt->name + MSG_SIZ - 104) = opt->value; // hide default values somewhere
+	if(opt->target == &opt->textValue) strncpy(opt->name + MSG_SIZ - 100, opt->textValue, 99);
 	return TRUE;
 }
 
