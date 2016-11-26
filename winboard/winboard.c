@@ -2727,6 +2727,15 @@ InitDrawingSizes(BoardSize boardSize, int flags)
     pieceBitmap[0][WhiteZebra] = DoLoadBitmap(hInst, "zebra", squareSize, "s");
     pieceBitmap[1][WhiteZebra] = DoLoadBitmap(hInst, "zebra", squareSize, "o");
     pieceBitmap[2][WhiteZebra] = DoLoadBitmap(hInst, "n", squareSize, "w");
+    pieceBitmap[0][WhiteTower] = DoLoadBitmap(hInst, "tower", squareSize, "s");
+    pieceBitmap[1][WhiteTower] = DoLoadBitmap(hInst, "tower", squareSize, "o");
+    pieceBitmap[2][WhiteTower] = DoLoadBitmap(hInst, "tower", squareSize, "w");
+    pieceBitmap[0][WhiteSword] = DoLoadBitmap(hInst, "sword", squareSize, "s");
+    pieceBitmap[1][WhiteSword] = DoLoadBitmap(hInst, "sword", squareSize, "o");
+    pieceBitmap[2][WhiteSword] = DoLoadBitmap(hInst, "sword", squareSize, "w");
+    pieceBitmap[0][WhiteGnu] = DoLoadBitmap(hInst, "gnu", squareSize, "s");
+    pieceBitmap[1][WhiteGnu] = DoLoadBitmap(hInst, "gnu", squareSize, "o");
+    pieceBitmap[2][WhiteGnu] = DoLoadBitmap(hInst, "gnu", squareSize, "w");
 
     if(gameInfo.variant == VariantShogi && BOARD_HEIGHT != 7) { /* promoted Gold representations (but not in Tori!)*/
       pieceBitmap[0][WhiteCannon] = DoLoadBitmap(hInst, "wp", squareSize, "s");
@@ -3756,6 +3765,7 @@ void DrawSeekClose()
 
 
 
+
 VOID
 HDCDrawPosition(HDC hdc, BOOLEAN repaint, Board board)
 {
@@ -4179,6 +4189,7 @@ HDCDrawPosition(HDC hdc, BOOLEAN repaint, Board board)
 	if(fac)
 	for(i=0; i<16; i++) fputDW(diagFile, color[i]);
 	// write bitmap data
+
 	for(i=0; i<wb*(b.bmHeight - boardRect.top + OUTER_MARGIN); i++) 
 		fputc(pData[i], diagFile);
 	free(pData);
@@ -6272,6 +6283,7 @@ InitComboStringsFromOption(HANDLE hwndCombo, char *str)
     buf1[len] = NULLCHAR;
     str = buf1;
   }
+
 
 
   SendMessage(hwndCombo, CB_RESETCONTENT, 0, 0);
