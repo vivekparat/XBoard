@@ -1182,6 +1182,10 @@ ParseArgs(GetFunc get, void *cl)
         ASSIGN(*(char **) ad->argLoc, buf);
         break;
       }
+      if(!strncmp(argValue, "@@@@@", 5)) { // conditional string argument
+        if(*(char**) ad->argLoc == 0) { ASSIGN(*(char **) ad->argLoc, argValue+5); } // only used to replace empty string
+	break;
+      }
       ASSIGN(*(char **) ad->argLoc, argValue);
       break;
 
