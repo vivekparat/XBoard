@@ -981,13 +981,14 @@ FloatToFront(char **list, char *engineLine)
     ASSIGN(*list, tidy+1);
 }
 
-char *insert, *wbOptions; // point in ChessProgramNames were we should insert new engine
+char *insert, *wbOptions, *currentEngine[2]; // point in ChessProgramNames were we should insert new engine
 
 void
 Load (ChessProgramState *cps, int i)
 {
     char *p, *q, buf[MSG_SIZ], command[MSG_SIZ], buf2[MSG_SIZ], buf3[MSG_SIZ], jar;
     if(engineLine && engineLine[0]) { // an engine was selected from the combo box
+	ASSIGN(currentEngine[i], engineLine);
 	snprintf(buf, MSG_SIZ, "-fcp %s", engineLine);
 	SwapEngines(i); // kludge to parse -f* / -first* like it is -s* / -second*
 	ParseArgsFromString(resetOptions); appData.pvSAN[0] = FALSE;
@@ -1046,6 +1047,7 @@ Load (ChessProgramState *cps, int i)
 	snprintf(firstChessProgramNames, len, "%s\n%s%s", q, buf, insert);
 	if(q) 	free(q);
 	FloatToFront(&appData.recentEngineList, buf);
+	ASSIGN(currentEngine[i], buf);
     }
     ReplaceEngine(cps, i);
 }
@@ -10928,12 +10930,14 @@ InitChessProgram (ChessProgramState *cps, int setup)
 }
 
 
-void
-ResendOptions (ChessProgramState *cps)
+char *
+ResendOptions (ChessProgramState *cps, int toEngine)
 { // send the stored value of the options
   int i;
-  char buf[MSG_SIZ];
+  static char buf2[MSG_SIZ*10];
+  char buf[MSG_SIZ], *p = buf2;
   Option *opt = cps->option;
+  *p = NULLCHAR;
   for(i=0; i<cps->nrOptions; i++, opt++) {
       *buf = NULLCHAR;
       switch(opt->type) {
@@ -10941,22 +10945,32 @@ ResendOptions (ChessProgramState *cps)
         case Slider:
         case CheckBox:
 	    if(opt->value != *(int*) (opt->name + MSG_SIZ - 104))
-	    snprintf(buf, MSG_SIZ, "option %s=%d\n", opt->name, opt->value);
+	    snprintf(buf, MSG_SIZ, "%s=%d", opt->name, opt->value);
           break;
         case ComboBox:
 	    if(opt->value != *(int*) (opt->name + MSG_SIZ - 104))
-            snprintf(buf, MSG_SIZ, "option %s=%s\n", opt->name, opt->choice[opt->value]);
+            snprintf(buf, MSG_SIZ, "%s=%s", opt->name, opt->choice[opt->value]);
           break;
         default:
 	    if(strcmp(opt->textValue, opt->name + MSG_SIZ - 100))
-	    snprintf(buf, MSG_SIZ, "option %s=%s\n", opt->name, opt->textValue);
+	    snprintf(buf, MSG_SIZ, "%s=%s", opt->name, opt->textValue);
           break;
         case Button:
         case SaveButton:
           continue;
       }
-      if(*buf) SendToProgram(buf, cps);
+      if(*buf) {
+        if(toEngine) {
+	  snprintf(buf2, MSG_SIZ, "option %s\n", buf);
+          SendToProgram(buf2, cps);
+        } else {
+          if(p != buf2) *p++ = ',';
+	  strncpy(p, buf, 10*MSG_SIZ-1 - (p - buf2));
+	  while(*p) p++;
+        }
+      }
   }
+  return buf2;
 }
 
 void
@@ -11004,7 +11018,7 @@ StartChessProgram (ChessProgramState *cps)
         cps->comboCnt = 0;  //                and values of combo boxes
       }
       SendToProgram(buf, cps);
-      if(cps->reload) ResendOptions(cps);
+      if(cps->reload) ResendOptions(cps, TRUE);
     } else {
       SendToProgram("xboard\n", cps);
     }
@@ -11256,6 +11270,32 @@ NamesToList (char *names, char **engineList, char **engineMnemonic, char *group)
     }
     engineList[i] = engineMnemonic[i] = NULL;
     return i;
+}
+
+void
+SaveEngineSettings (int n)
+{
+    int len; char *p, *q, *s, buf[MSG_SIZ], *optionSettings;
+    if(!currentEngine[n] || !currentEngine[n][0]) return; // no engine from list is loaded
+    p = strstr(firstChessProgramNames, currentEngine[n]);
+    if(!p) return; // sanity check; engine could be deleted from list after loading
+    optionSettings = ResendOptions(n ? &second : &first, FALSE);
+    len = strlen(currentEngine[n]);
+    q = p + len; *p = 0; // cut list into head and tail piece
+    s = strstr(currentEngine[n], "firstOptions");
+    if(s && (s[-1] == '-' || s[-1] == '/') && (s[12] == ' ' || s[12] == '=') && (s[13] == '"' || s[13] == '\'')) {
+	char *r = s + 14;
+	while(*r && *r != s[13]) r++;
+	s[14] = 0; // cut currentEngine into head and tail part, removing old settings
+	snprintf(buf, MSG_SIZ, "%s%s%s", currentEngine[n], optionSettings, *r ? r : "\""); // synthesize new engine line
+    } else if(*optionSettings) {
+	snprintf(buf, MSG_SIZ, "%s -firstOptions \"%s\"", currentEngine[n], optionSettings);
+    }
+    ASSIGN(currentEngine[n], buf); // updated engine line
+    len = p - firstChessProgramNames + strlen(q) + strlen(currentEngine[n]) + 1;
+    s = malloc(len);
+    snprintf(s, len, "%s%s%s", firstChessProgramNames, currentEngine[n], q);
+    FREE(firstChessProgramNames); firstChessProgramNames = s; // new list
 }
 
 // following implemented as macro to avoid type limitations
@@ -17367,6 +17407,7 @@ ParseFeatures (char *args, ChessProgramState *cps)
     if (StringFeature(&p, "egt", &cps->egtFormats, cps)) continue;
     if (StringFeature(&p, "option", &q, cps)) { // read to freshly allocated temp buffer first
 	if(cps->reload) { FREE(q); q = NULL; continue; } // we are reloading because of xreuse
+	if(cps->nrOptions == 0) { ASSIGN(cps->option[0].name, _("Make Persistent -save")); ParseOption(&(cps->option[cps->nrOptions++]), cps); }
 	FREE(cps->option[cps->nrOptions].name);
 	cps->option[cps->nrOptions].name = q; q = NULL;
 	if(!ParseOption(&(cps->option[cps->nrOptions++]), cps)) { // [HGM] options: add option feature

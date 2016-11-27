@@ -541,6 +541,12 @@ LRESULT CALLBACK SettingsProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
 		     GetOptionValues(hDlg, activeCps, activeList);
 		else if( activeList[j].type  != Button) break;
 		else if( !activeCps ) { (*(ButtonCallback*) activeList[j].target)(hDlg); break; }
+		if(j == 0) { // WinBoard save button
+		    SaveEngineSettings(activeCps == &second);
+	            EndDialog( hDlg, 0 );
+		    comboCallback = NULL; activeCps = NULL; settingsDlg = NULL;
+	            return TRUE;
+		}
 		snprintf(buf, MSG_SIZ, "option %s\n", activeList[j].name);
 		SendToProgram(buf, activeCps);
 	    }
