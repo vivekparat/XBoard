@@ -1031,7 +1031,7 @@ Load (ChessProgramState *cps, int i)
 	q = firstChessProgramNames;
 	if(nickName[0]) snprintf(buf, MSG_SIZ, "\"%s\" -fcp ", nickName); else buf[0] = NULLCHAR;
 	quote = strchr(p, '"') ? '\'' : '"'; // use single quotes around engine command if it contains double quotes
-	snprintf(buf+strlen(buf), MSG_SIZ-strlen(buf), "%c%s%c -fd \"%s\"%s%s%s%s%s%s%s%s\n",
+	snprintf(buf+strlen(buf), MSG_SIZ-strlen(buf), "%c%s%c -fd \"%s\"%s%s%s%s%s%s%s%s",
 			quote, p, quote, appData.directory[i],
 			useNick ? " -fn \"" : "",
 			useNick ? nickName : "",
@@ -1041,10 +1041,10 @@ Load (ChessProgramState *cps, int i)
 			isUCI ? (isUCI == TRUE ? " -fUCI" : gameInfo.variant == VariantShogi ? " -fUSI" : " -fUCCI") : "",
 			storeVariant ? " -variant " : "",
 			storeVariant ? VariantName(gameInfo.variant) : "");
-	if(wbOptions && wbOptions[0]) snprintf(buf+strlen(buf)-1, MSG_SIZ-strlen(buf), " %s\n", wbOptions);
-	firstChessProgramNames = malloc(len = strlen(q) + strlen(buf) + 1);
+	if(wbOptions && wbOptions[0]) snprintf(buf+strlen(buf), MSG_SIZ-strlen(buf), " %s", wbOptions);
+	firstChessProgramNames = malloc(len = strlen(q) + strlen(buf) + 2);
 	if(insert != q) insert[-1] = NULLCHAR;
-	snprintf(firstChessProgramNames, len, "%s\n%s%s", q, buf, insert);
+	snprintf(firstChessProgramNames, len, "%s\n%s\n%s", q, buf, insert);
 	if(q) 	free(q);
 	FloatToFront(&appData.recentEngineList, buf);
 	ASSIGN(currentEngine[i], buf);
