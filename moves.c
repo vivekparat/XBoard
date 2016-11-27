@@ -1768,10 +1768,10 @@ CheckTest (Board board, int flags, int rf, int ff, int rt, int ft, int enPassant
     /* For compatibility with ICS wild 9, we scan the board in the
        order a1, a2, a3, ... b1, b2, ..., h8 to find the first king,
        and we test only whether that one is in check. */
+    cl.check = 0;
     for (cl.fking = BOARD_LEFT+0; cl.fking < BOARD_RGHT; cl.fking++)
 	for (cl.rking = 0; cl.rking < BOARD_HEIGHT; cl.rking++) {
           if (board[cl.rking][cl.fking] == king) {
-	      cl.check = 0;
               if(gameInfo.variant == VariantXiangqi) {
                   /* [HGM] In Xiangqi opposing Kings means check as well */
                   int i, dir;
@@ -1806,7 +1806,7 @@ CheckTest (Board board, int flags, int rf, int ff, int rt, int ft, int enPassant
 	board[EP_STATUS] = ep;
     }
 
-    return cl.fking < BOARD_RGHT ? cl.check : 1000; // [HGM] atomic: return 1000 if we have no king
+    return cl.fking < BOARD_RGHT ? cl.check : (gameInfo.variant == VariantAtomic)*1000; // [HGM] atomic: return 1000 if we have no king
 }
 
 int
