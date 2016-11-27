@@ -172,7 +172,7 @@ unsigned char kanjiTab[] = {
 
 int NextUnit P((char **p));
 
-int kifu = 0;
+int kifu = 0, xqUBB = 0;
 
 char
 GetKanji (char **p, int start)
@@ -426,6 +426,14 @@ NextUnit (char **p)
 	     if(q = strchr(s, **p)) (*p)++, piece += 64*(q - s + 1);
 	     if(**p == '/') slash = *(*p)++;
 	}
+
+	if(xqUBB) { // Xiangqi UBB movelist
+	    while(isdigit(**p)) {
+		type[n] = NUMERIC; coord[n++] = *(*p)++ - '0';
+		if(n >= 4) break;
+	    }
+	    if(n < 4) *p -= n, xqUBB = n = 0; else type[0] = type[2] = ALPHABETIC, coord[1] = 9 - coord[1], coord[3] = 9 - coord[3];
+	}
         while(n < 4) {
 	    if(**p >= 'a' && **p < 'x') coord[n] = *(*p)++ - 'a', type[n++] = ALPHABETIC;
 	    else if((i = Number(p)) != BADNUMBER) coord[n] = i, type[n++] = NUMERIC;
@@ -604,6 +612,13 @@ badMove:// we failed to find algebraic move
 		*p = oldp;
 	    }
 	    SkipWhite(p);
+	    if(Match("DhtmlXQ", p)) { // Xiangqi UBB tags
+		int res = Nothing;
+		if(**p == ']') strcpy(parseStart = yytext, "[Variant \"xiangqi\"]"), res = PGNTag; else
+		if(Match("_movelist", p)) xqUBB = 1; else Scan(']', p);
+		Scan(']', p); // for non-movelist tags this skips to the closing tag (disarming any enclosed kanji)!
+		return res;
+	    } else if(Match("/DhtmlXQ", p)) { Scan(']', p); return Nothing; }
 	    if(isdigit(**p) || isalpha(**p)) {
 		do (*p)++; while(isdigit(**p) || isalpha(**p) || **p == '+' ||
 				**p == '-' || **p == '=' || **p == '_' || **p == '#');
