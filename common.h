@@ -818,6 +818,7 @@ typedef struct {
     int tourneyType;
     int tourneyCycles;
     int seedBase;
+    int bmpSave;
     Boolean roundSync;
     Boolean cycleSync;
     Boolean numberTag;

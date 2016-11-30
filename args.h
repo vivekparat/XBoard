@@ -112,6 +112,7 @@ char *firstEngineLine;
 char *secondEngineLine;
 char *icsNick;
 char *theme;
+char *replace;
 
 void EnsureOnScreen(int *x, int *y, int minX, int minY);
 char StringGet(void *getClosure);
@@ -620,6 +621,7 @@ ArgDescriptor argDescriptors[] = {
   { "replace", ArgString, (void *) &replace, FALSE, (ArgIniType) NULL },
   { "fixedSize", ArgBoolean, (void *) &appData.fixedSize, TRUE, (ArgIniType) FALSE },
   { "showMoveTime", ArgBoolean, (void *) &appData.moveTime, TRUE, (ArgIniType) FALSE },
+  { "bmpSave", ArgInt, (void *) &appData.bmpSave, FALSE, 0 },
 
   // [HGM] tournament options
   { "tourneyFile", ArgFilename, (void *) &appData.tourneyFile, FALSE, (ArgIniType) "" },
@@ -1184,7 +1186,7 @@ ParseArgs(GetFunc get, void *cl)
         break;
       }
       if(replace) { // previous -replace option makes this string option conditional
-	char *p = replace;
+	char *p = (char*) replace;
 	free(replace); replace = NULL; // but expires in the process
         if(strcmp(*(char**) ad->argLoc, p)) break; // only use to replace the given string
       }

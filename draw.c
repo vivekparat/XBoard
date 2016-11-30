@@ -375,6 +375,38 @@ LoadSVG (char *dir, int color, int piece, int retry)
     return NULL;
 }
 
+static void Wint(FILE *f, int n)
+{   // write 32-bit int, lsb first
+    fprintf(f, "%c%c%c%c", n&255, n>>8&255, n>>16&255, n>>24&255);
+}
+
+static void
+SaveWindowsBitmap(ChessSquare piece, int color, int *data, int stride, int w, int h, int bpp)
+{
+    int i, v, line = (w*bpp + 3)>>2, size = line*4*h;
+    char buf[100];
+    FILE *f;
+    snprintf(buf, 100, "bmaps/piece%d_%d%c.bmp", piece, w, color ? 's': 'o');
+    if(piece >= appData.bmpSave && piece != WhiteKing) return;
+    f = fopen(buf, "wb");
+    if(!f) return;
+    fprintf(f, "BM");
+    Wint(f, size+54); Wint(f, 0); Wint(f, 54); Wint(f, 40); // file size, reserved, image offset, header size
+    Wint(f, w); Wint(f, h); Wint(f, 8*bpp << 16 | 1); // width, height, planes & bits/pix
+    Wint(f, 0); // compression
+    Wint(f, size); Wint(f, 3780); Wint(f, 3780); Wint(f, 0); Wint(f, 0); // image size, pix/m (H and V), color-table size (2x)
+    for(v=h-1; v>=0; v--) {
+	for(i=0; i<w; i++) {
+	    int pix = data[stride*v+i], r=pix>>16&255, g=pix>>8&255, b=pix&255, a=pix>>24&255;
+	    r = r*a/255; b = b*a/255; g = g*a/255;
+	    if(bpp == 4) fprintf(f, "%c%c%c%c", b, g, r, a); else fprintf(f, "%c%c%c", b, g, r);
+	}
+	i *= bpp; while(i++ < line*4) fprintf(f, "%c", 0); // padding
+    }
+    fclose(f);
+    if(appData.bmpSave && piece == WhiteKing && color) exit(0);
+}
+
 static void
 ScaleOnePiece (int color, int piece, char *pieceDir)
 {
@@ -431,6 +463,7 @@ ScaleOnePiece (int color, int piece, char *pieceDir)
     int i, j, p;
     sscanf(color ? appData.blackPieceColor+1 : appData.whitePieceColor+1, "%x", &p); // replacement color
     cairo_surface_flush(cs);
+    SaveWindowsBitmap(piece, color, buf, stride, squareSize, squareSize, 4);
     for(i=0; i<squareSize; i++) for(j=0; j<squareSize; j++) {
 	int r, a;
 	float f;
