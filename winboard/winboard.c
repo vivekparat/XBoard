@@ -55,6 +55,10 @@
  *------------------------------------------------------------------------
  ** See the file ChangeLog for a revision history.  */
 
+#ifndef WINVER
+#define WINVER 0x0500
+#endif
+
 #include "config.h"
 
 #include <windows.h>
@@ -2193,7 +2197,7 @@ void CreatePiecesFromFont()
 HBITMAP
 DoLoadBitmap(HINSTANCE hinst, char *piece, int squareSize, char *suffix)
 {
-  char name[128], buf[MSG_SIZ];
+  char name[128], buf[MSG_SIZ], *ids = "pnbrqfeicwmohajgdvlsukaacvdklnwpwnwlwswolfgnuzebracameltowersword", *p;
 
     snprintf(name, sizeof(name)/sizeof(name[0]), "%s%d%s", piece, squareSize, suffix);
   if(appData.pieceDirectory[0]) {
@@ -2201,6 +2205,30 @@ DoLoadBitmap(HINSTANCE hinst, char *piece, int squareSize, char *suffix)
     snprintf(buf, MSG_SIZ, "%s\\%s.bmp", appData.pieceDirectory, name);
     res = LoadImage( 0, buf, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE );
     if(res) return res;
+    p = strstr(ids, piece);
+    if(p) { // if we could reconstruct canonical piece number, try the pieceNNN_ format before falling back on built-ins
+      int n = p - ids;
+      switch(n) {
+	case 21: n = WhiteKing; break;
+	case 22: n = WhiteAngel; break;
+	case 24: n = WhiteSilver; break;
+	case 26: n = WhiteDragon; break;
+	case 28: n = WhiteLion; break;
+	case 30: n = WhiteTokin; break;
+	case 32: n = WhitePKnight; break;
+	case 34: n = WhitePLance; break;
+	case 36: n = WhitePSilver; break;
+	case 38: n = WhiteWolf; break;
+	case 42: n = WhiteGnu; break;
+	case 45: n = WhiteZebra; break;
+	case 50: n = WhiteCamel; break;
+	case 55: n = WhiteTower; break;
+	case 60: n = WhiteSword; break;
+      }
+      snprintf(buf, MSG_SIZ, "%s\\piece%d_%d%s.bmp", appData.pieceDirectory, n, squareSize, suffix);
+      res = LoadImage( 0, buf, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE );
+      if(res) return res;
+    }
   }
   if (gameInfo.event &&
       strcmp(gameInfo.event, "Easter Egg Hunt") == 0 &&
@@ -2992,7 +3020,7 @@ VOID
 DrawPieceOnDC(HDC hdc, ChessSquare piece, int color, int sqcolor, int x, int y, HDC tmphdc)
 {
   HBITMAP oldBitmap;
-  HBRUSH oldBrush;
+  HBRUSH oldBrush = NULL;
   int tmpSize;
 
   if (appData.blindfold) return;
@@ -3051,6 +3079,20 @@ DrawPieceOnDC(HDC hdc, ChessSquare piece, int color, int sqcolor, int x, int y, 
       y += squareSize - minorSize - 2;
       tmpSize = minorSize;
     }
+#if WINVER >= 0x0500
+    HBITMAP pbm = PieceBitmap(piece, color ? OUTLINE_PIECE : SOLID_PIECE);
+    BITMAP b;
+    GetObject(pbm, sizeof(BITMAP), &b);
+    if(b.bmBitsPixel == 32) { // for now this is a kludge to indicate bitmaps with alpha channel
+	BLENDFUNCTION bf;
+	bf.BlendOp = AC_SRC_OVER;
+	bf.BlendFlags = 0;
+	bf.SourceConstantAlpha = 0xFF;
+	bf.AlphaFormat = AC_SRC_ALPHA;
+	oldBitmap = SelectObject(tmphdc, pbm);
+	AlphaBlend(hdc, x, y, tmpSize, tmpSize, tmphdc, 0, 0, tmpSize, tmpSize, bf);
+    } else
+#endif
     if (color || appData.allWhite ) {
       oldBitmap = SelectObject(tmphdc, PieceBitmap(piece, WHITE_PIECE));
       if( color )
@@ -3087,7 +3129,7 @@ DrawPieceOnDC(HDC hdc, ChessSquare piece, int color, int sqcolor, int x, int y, 
       else
         BitBlt(hdc, x, y, tmpSize, tmpSize, tmphdc, 0, 0, 0x00B8074A);
     }
-    SelectObject(hdc, oldBrush);
+    if(oldBrush) SelectObject(hdc, oldBrush);
     SelectObject(tmphdc, oldBitmap);
   }
 }
