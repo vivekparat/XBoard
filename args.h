@@ -617,6 +617,7 @@ ArgDescriptor argDescriptors[] = {
   { "epd", ArgTrue, (void *) &appData.epd, FALSE, INVALID },
   { "inscriptions", ArgString, (void *) &appData.inscriptions, FALSE, (ArgIniType) "" },
   { "autoInstall", ArgString, (void *) &appData.autoInstall, XBOARD, (ArgIniType) "" },
+  { "replace", ArgString, (void *) &replace, FALSE, (ArgIniType) NULL },
   { "fixedSize", ArgBoolean, (void *) &appData.fixedSize, TRUE, (ArgIniType) FALSE },
   { "showMoveTime", ArgBoolean, (void *) &appData.moveTime, TRUE, (ArgIniType) FALSE },
 
@@ -1182,9 +1183,10 @@ ParseArgs(GetFunc get, void *cl)
         ASSIGN(*(char **) ad->argLoc, buf);
         break;
       }
-      if(!strncmp(argValue, "@@@@@", 5)) { // conditional string argument
-        if(*(char**) ad->argLoc == 0) { ASSIGN(*(char **) ad->argLoc, argValue+5); } // only used to replace empty string
-	break;
+      if(replace) { // previous -replace option makes this string option conditional
+	char *p = replace;
+	free(replace); replace = NULL; // but expires in the process
+        if(strcmp(*(char**) ad->argLoc, p)) break; // only use to replace the given string
       }
       ASSIGN(*(char **) ad->argLoc, argValue);
       break;
