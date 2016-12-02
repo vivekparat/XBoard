@@ -11274,9 +11274,9 @@ void
 SaveEngineSettings (int n)
 {
     int len; char *p, *q, *s, buf[MSG_SIZ], *optionSettings;
-    if(!currentEngine[n] || !currentEngine[n][0]) return; // no engine from list is loaded
+    if(!currentEngine[n] || !currentEngine[n][0]) { DisplayMessage("saving failed: engine not from list", ""); return; } // no engine from list is loaded
     p = strstr(firstChessProgramNames, currentEngine[n]);
-    if(!p) return; // sanity check; engine could be deleted from list after loading
+    if(!p) { DisplayMessage("saving failed: engine not found in list", ""); return; } // sanity check; engine could be deleted from list after loading
     optionSettings = ResendOptions(n ? &second : &first, FALSE);
     len = strlen(currentEngine[n]);
     q = p + len; *p = 0; // cut list into head and tail piece
