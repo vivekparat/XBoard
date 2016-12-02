@@ -11343,6 +11343,7 @@ GetEngineLine (char *s, int n)
     if(n == 1) SwapEngines(n);
     ParseArgsFromString(buf);
     if(n == 1) SwapEngines(n);
+    if(n < 2) { ASSIGN(currentEngine[n], command[i]); }
     if(n == 0 && *appData.secondChessProgram == NULLCHAR) {
 	SwapEngines(1); // set second same as first if not yet set (to suppress WB startup dialog)
 	ParseArgsFromString(buf);
