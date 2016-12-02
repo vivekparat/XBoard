@@ -1593,8 +1593,6 @@ MatchEvent (int mode)
 	NextMatchGame();
 }
 
-char *comboLine = NULL; // [HGM] recent: WinBoard's first-engine combobox line
-
 void
 InitBackEnd3 P((void))
 {
@@ -1626,7 +1624,7 @@ InitBackEnd3 P((void))
 	free(programVersion);
 	programVersion = (char*) malloc(8 + strlen(PACKAGE_STRING) + strlen(first.tidy));
 	sprintf(programVersion, "%s + %s", PACKAGE_STRING, first.tidy);
-	FloatToFront(&appData.recentEngineList, comboLine ? comboLine : appData.firstChessProgram);
+	FloatToFront(&appData.recentEngineList, currentEngine[0] ? currentEngine[0] : appData.firstChessProgram);
     }
 
     if (appData.icsActive) {

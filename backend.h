@@ -413,7 +413,7 @@ extern ChessProgramStats programStats;
 extern int opponentKibitzes; // used by wengineo.c
 extern int errorExitStatus;
 extern char *recentEngines;
-extern char *comboLine;
+extern char *currentEngine[];
 extern Boolean partnerUp, twoBoards;
 extern char engineVariant[];
 void SaveEngineSettings P((int n));

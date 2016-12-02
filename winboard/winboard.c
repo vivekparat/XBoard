@@ -6451,11 +6451,12 @@ StartupDialog(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
         safeStrCpy(buf, "/fcp=", sizeof(buf)/sizeof(buf[0]) );
 	GetDlgItemText(hDlg, OPT_ChessEngineName, buf + strlen(buf), sizeof(buf) - strlen(buf));
         p = buf;
-	comboLine = strdup(p+5); // [HGM] recent: remember complete line of first combobox
+	currentEngine[0] = strdup(p+5); // [HGM] recent: remember complete line of first combobox
 	ParseArgs(StringGet, &p);
 	safeStrCpy(buf, singleList ? "/fcp=" : "/scp=", sizeof(buf)/sizeof(buf[0]) );
 	GetDlgItemText(hDlg, OPT_SecondChessEngineName, buf + strlen(buf), sizeof(buf) - strlen(buf));
         p = buf;
+	currentEngine[1] = strdup(p+5); // [HGM] also remember engine line of 2nd for saving its settings
 	SwapEngines(singleList); // temporarily swap first and second, to load a second 'first', ...
 	ParseArgs(StringGet, &p);
 	SwapEngines(singleList); // ... and then make it 'second'
