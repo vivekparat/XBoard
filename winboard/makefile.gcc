@@ -50,7 +50,7 @@ else
 endif
 CF = -c $(WARN) -pipe $(CFDEBUG) $(DEFS) -I. -I..
 CFLAGS = $(CF) $(ARCH) $(OPTS) $(CFCYG)
-LFLAGS = $(LFCYG) $(CFDEBUG) -fpic -s -mwindows -lwsock32 -lwinmm -lcomctl32
+LFLAGS = $(LFCYG) $(CFDEBUG) -fpic -s -mwindows -lwsock32 -lwinmm -lcomctl32 -lmsimg32
 
 all: $(PROJ).exe
 
