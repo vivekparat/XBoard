@@ -7462,7 +7462,7 @@ MarkTargetSquares (int clear)
     if(PosFlags(0) & F_MANDATORY_CAPTURE) {
       for(x=0; x<BOARD_WIDTH; x++) for(y=0; y<BOARD_HEIGHT; y++) if(marker[y][x]>1) capt++;
       if(capt)
-      for(x=0; x<BOARD_WIDTH; x++) for(y=0; y<BOARD_HEIGHT; y++) if(marker[y][x] == 1) marker[y][x] = 0;
+      for(x=0; x<BOARD_WIDTH; x++) for(y=0; y<BOARD_HEIGHT; y++) if(marker[y][x] == 1) marker[y][x] = legal[y][x] = 0;
     }
   }
   DrawPosition(FALSE, NULL);
