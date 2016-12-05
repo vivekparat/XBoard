@@ -809,7 +809,7 @@ GenPseudoLegal (Board board, int flags, MoveCallback callback, VOIDSTAR closure,
 			       rf, ff, rf + 1, ff + s, closure);
 		  }
 		  if (rf >= BOARD_HEIGHT+1>>1) {// [HGM] grand: 4th & 5th rank on 10-board
-		      int victimFile = (board[LAST_FILE] == 100 ? ff + s : board[LAST_FILE]);
+		      int victimFile = (board[LAST_TO] & 0x40 ? ff + s : board[LAST_TO] & 255);
                       if (ff + s >= BOARD_LEFT && ff + s < BOARD_RGHT &&
 			  (board[EP_FILE] == ff + s || epfile == EP_UNKNOWN) && rf < BOARD_HEIGHT-3 &&
                           (board[rf][victimFile] == BlackPawn || board[rf][victimFile] == BlackLance) &&
@@ -860,7 +860,7 @@ GenPseudoLegal (Board board, int flags, MoveCallback callback, VOIDSTAR closure,
 			       rf, ff, rf - 1, ff + s, closure);
 		  }
 		  if (rf < BOARD_HEIGHT>>1) {
-		      int victimFile = (board[LAST_FILE] == 100 ? ff + s : board[LAST_FILE]);
+		      int victimFile = (board[LAST_TO] & 0x40 ? ff + s : board[LAST_TO] & 255);
                       if (ff + s >= BOARD_LEFT && ff + s < BOARD_RGHT &&
 			  (board[EP_FILE] == ff + s || epfile == EP_UNKNOWN) && rf > 2 &&
 			  (board[rf][victimFile] == WhitePawn || board[rf][victimFile] == WhiteLance) &&

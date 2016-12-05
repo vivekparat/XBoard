@@ -10220,9 +10220,9 @@ ApplyMove (int fromX, int fromY, int toX, int toY, int promoChar, Board board)
     /* we can always do that 'in place', now pointers to these rights are passed to ApplyMove */
 
       if(gameInfo.variant == VariantBerolina) berolina = EP_BEROLIN_A;
-      oldEP = (signed char)board[EP_STATUS]; epRank = board[EP_RANK]; epFile = board[EP_FILE]; lastFile = board[LAST_FILE],lastRank = board[LAST_RANK];
+      oldEP = (signed char)board[EP_STATUS]; epRank = board[EP_RANK]; epFile = board[EP_FILE]; lastFile = board[LAST_TO] & 255,lastRank = board[LAST_TO] >> 8;
       board[EP_STATUS] = EP_NONE;
-      board[EP_FILE] = board[EP_RANK] = board[LAST_FILE] = board[LAST_RANK] = 100;
+      board[EP_FILE] = board[EP_RANK] = 100, board[LAST_TO] = 0x4040;
 
   if (fromY == DROP_RANK) {
 	/* must be first */
@@ -10278,7 +10278,7 @@ ApplyMove (int fromX, int fromY, int toX, int toY, int promoChar, Board board)
                if(toX<BOARD_RGHT-1 && board[toY][toX+1] == BlackPawn &&
 			gameInfo.variant != VariantBerolina || toX > fromX)
 	              board[EP_STATUS] = toX;
-	       board[LAST_FILE] = toX; board[LAST_RANK] = toY;
+	       board[LAST_TO] = toX + 256*toY;
 	   }
       } else
       if( pawn == BlackPawn ) {
@@ -10292,7 +10292,7 @@ ApplyMove (int fromX, int fromY, int toX, int toY, int promoChar, Board board)
                if(toX<BOARD_RGHT-1 && board[toY][toX+1] == WhitePawn &&
 			gameInfo.variant != VariantBerolina || toX > fromX)
 	              board[EP_STATUS] = toX;
-	       board[LAST_FILE] = toX; board[LAST_RANK] = toY;
+	       board[LAST_TO] = toX + 256*toY;
 	   }
        }
 
