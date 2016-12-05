@@ -18467,6 +18467,12 @@ PositionToFEN (int move, char *overrideCastling, int moveCounts)
   }
   }
 
+    i = boards[move][CHECK_COUNT];
+    if(i) {
+	sprintf(p, "%d+%d ", i&255, i>>8);
+	while(*p) p++;
+    }
+
     if(moveCounts)
     {   int i = 0, j=move;
 
@@ -18827,10 +18833,19 @@ ParseFEN (Board board, int *blackPlaysFirst, char *fen, Boolean autoSize)
       }
     }
 
+    while(*p == ' ') p++;
 
-    if(sscanf(p, "%d", &i) == 1) {
+    board[CHECK_COUNT] = 0; // [HGM] 3check: check-count field
+    if(sscanf(p, "%d+%d", &i, &j) == 2) {
+	board[CHECK_COUNT] = i + 256*j;
+ 	while(*p && *p != ' ') p++;
+    }
+
+    c = sscanf(p, "%d%*d +%d+%d", &i, &j, &k);
+    if(c > 0) {
         FENrulePlies = i; /* 50-move ply counter */
         /* (The move number is still ignored)    */
+	if(c == 3 && !board[CHECK_COUNT]) board[CHECK_COUNT] = (3 - j) + 256*(3 - k); // SCIDB-style check count
     }
 
     return TRUE;
