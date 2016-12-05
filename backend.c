@@ -6451,6 +6451,7 @@ InitPosition (int redraw)
       initialPosition[1][1] = initialPosition[2][1] =
       initialPosition[6][BOARD_WIDTH-2] = initialPosition[5][BOARD_WIDTH-2] = 1;
      }
+     initialPosition[CHECK_COUNT] = (gameInfo.variant == Variant3Check ? 0x303 : 0);
   if (appData.debugMode) {
     fprintf(debugFP, "shuffleOpenings = %d\n", shuffleOpenings);
   }
@@ -10030,7 +10031,7 @@ void
 ParseGameHistory (char *game)
 {
     ChessMove moveType;
-    int fromX, fromY, toX, toY, boardIndex;
+    int fromX, fromY, toX, toY, boardIndex, mask;
     char promoChar;
     char *p, *q;
     char buf[MSG_SIZ];
@@ -10191,15 +10192,18 @@ ParseGameHistory (char *game)
 	strcat(moveList[boardIndex], "\n");
 	boardIndex++;
 	ApplyMove(fromX, fromY, toX, toY, promoChar, boards[boardIndex]);
+	mask = (WhiteOnMove(boardIndex) ? 0xFF : 0xFF00);
         switch (MateTest(boards[boardIndex], PosFlags(boardIndex)) ) {
 	  case MT_NONE:
 	  case MT_STALEMATE:
 	  default:
 	    break;
 	  case MT_CHECK:
-            if(!IS_SHOGI(gameInfo.variant))
-                strcat(parseList[boardIndex - 1], "+");
-	    break;
+            if(boards[boardIndex][CHECK_COUNT]) boards[boardIndex][CHECK_COUNT] -= mask & 0x101;
+            if(!boards[boardIndex][CHECK_COUNT] || boards[boardIndex][CHECK_COUNT] & mask) {
+                if(!IS_SHOGI(gameInfo.variant)) strcat(parseList[boardIndex - 1], "+");
+                break;
+	    }
 	  case MT_CHECKMATE:
 	  case MT_STAINMATE:
 	    strcat(parseList[boardIndex - 1], "#");
@@ -10589,7 +10593,7 @@ ApplyMove (int fromX, int fromY, int toX, int toY, int promoChar, Board board)
 void
 MakeMove (int fromX, int fromY, int toX, int toY, int promoChar)
 {
-    int x = toX, y = toY;
+    int x = toX, y = toY, mask;
     char *s = parseList[forwardMostMove];
     ChessSquare p = boards[forwardMostMove][toY][toX];
 //    forwardMostMove++; // [HGM] bare: moved downstream
@@ -10685,15 +10689,18 @@ MakeMove (int fromX, int fromY, int toX, int toY, int promoChar)
     }
     CoordsToComputerAlgebraic(fromY, fromX, toY, toX, promoChar,
 			      moveList[forwardMostMove - 1]);
+    mask = (WhiteOnMove(forwardMostMove) ? 0xFF : 0xFF00);
     switch (MateTest(boards[forwardMostMove], PosFlags(forwardMostMove)) ) {
       case MT_NONE:
       case MT_STALEMATE:
       default:
 	break;
       case MT_CHECK:
-        if(!IS_SHOGI(gameInfo.variant))
-            strcat(parseList[forwardMostMove - 1], "+");
-	break;
+        if(boards[forwardMostMove][CHECK_COUNT]) boards[forwardMostMove][CHECK_COUNT] -= mask & 0x101;
+	if(!boards[forwardMostMove][CHECK_COUNT] || boards[forwardMostMove][CHECK_COUNT] & mask) {
+            if(!IS_SHOGI(gameInfo.variant)) strcat(parseList[forwardMostMove - 1], "+");
+            break;
+        }
       case MT_CHECKMATE:
       case MT_STAINMATE:
 	strcat(parseList[forwardMostMove - 1], "#");
