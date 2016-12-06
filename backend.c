@@ -4209,6 +4209,12 @@ read_from_ics (InputSourceRef isr, VOIDSTAR closure, char *data, int count, int 
                                                         parse, currentMove);
 		    if (sscanf(parse, " game %d", &gamenum) == 1) {
 		      if(gamenum == ics_gamenum) { // [HGM] bughouse: old code if part of foreground game
+			new_piece[0] = NULLCHAR;
+			sscanf(parse, "game %d white [%s black [%s <- %s",
+			       &gamenum, white_holding, black_holding,
+			       new_piece);
+                        white_holding[strlen(white_holding)-1] = NULLCHAR;
+                        black_holding[strlen(black_holding)-1] = NULLCHAR;
 		        if (gameInfo.variant == VariantNormal) {
                           /* [HGM] We seem to switch variant during a game!
                            * Presumably no holdings were displayed, so we have
@@ -4219,7 +4225,10 @@ read_from_ics (InputSourceRef isr, VOIDSTAR closure, char *data, int count, int 
 			  switch(gameInfo.boardWidth) { // base guess on board width
 				case 9:  newVariant = VariantShogi; break;
 				case 10: newVariant = VariantGreat; break;
-				default: newVariant = VariantCrazyhouse; break;
+				default: newVariant = VariantCrazyhouse;
+				     if(strchr(white_holding, 'E') || strchr(black_holding, 'E') || 
+					strchr(white_holding, 'H') || strchr(black_holding, 'H')   )
+					 newVariant = VariantSChess;
 			  }
                           VariantSwitch(boards[currentMove], newVariant); /* temp guess */
 			  /* Get a move list just to see the header, which
@@ -4230,12 +4239,6 @@ read_from_ics (InputSourceRef isr, VOIDSTAR closure, char *data, int count, int 
 			    SendToICS(str);
 			  }
 			}
-			new_piece[0] = NULLCHAR;
-			sscanf(parse, "game %d white [%s black [%s <- %s",
-			       &gamenum, white_holding, black_holding,
-			       new_piece);
-                        white_holding[strlen(white_holding)-1] = NULLCHAR;
-                        black_holding[strlen(black_holding)-1] = NULLCHAR;
                         /* [HGM] copy holdings to board holdings area */
                         CopyHoldings(boards[forwardMostMove], white_holding, WhitePawn);
                         CopyHoldings(boards[forwardMostMove], black_holding, BlackPawn);
