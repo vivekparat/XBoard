@@ -18445,13 +18445,15 @@ PositionToFEN (int move, char *overrideCastling, int moveCounts)
         fromY = moveList[move - 1][1] - ONE;
         toX = moveList[move - 1][2] - AAA;
         toY = moveList[move - 1][3] - ONE;
-	if (fromY == (whiteToPlay ? BOARD_HEIGHT-2 : 1) &&
-	    toY == (whiteToPlay ? BOARD_HEIGHT-4 : 3) &&
-	    boards[move][toY][toX] == (whiteToPlay ? BlackPawn : WhitePawn) &&
-	    fromX == toX) {
+	if ((whiteToPlay ? toY < fromY - 1 : toY > fromY + 1) &&
+	    boards[move][toY][toX] == (whiteToPlay ? BlackPawn : WhitePawn) ) {
 	    /* 2-square pawn move just happened */
-            *p++ = toX + AAA;
-	    *p++ = whiteToPlay ? '6'+BOARD_HEIGHT-8 : '3';
+            *p++ = (3*toX + 5*fromX + 4)/8 + AAA;
+	    *p++ = (3*toY + 5*fromY + 4)/8 + ONE;
+	    if(gameInfo.variant == VariantBerolina) {
+		*p++ = toX + AAA;
+		*p++ = toY + ONE;
+	    }
 	} else {
 	    *p++ = '-';
 	}
@@ -18828,11 +18830,22 @@ ParseFEN (Board board, int *blackPlaysFirst, char *fen, Boolean autoSize)
       if(*p=='-') {
         p++; board[EP_STATUS] = EP_NONE;
       } else {
-         char c = *p++ - AAA;
+         int d, r, c = *p - AAA;
 
-         if(c < BOARD_LEFT || c >= BOARD_RGHT) return TRUE;
-         if(*p >= '0' && *p <='9') p++;
-         board[EP_STATUS] = c;
+         if(c >= BOARD_LEFT && c < BOARD_RGHT) {
+             p++;
+             board[EP_STATUS] = board[EP_FILE] = c; r = 0;
+             if(*p >= '0' && *p <='9') r = board[EP_RANK] = *p++ - ONE;
+             d = (r < BOARD_HEIGHT << 1 ? 1 : -1); // assume double-push (P next to e.p. square nearer center)
+             if(board[r+d][c] == EmptySquare) d *= 2; // but if no Pawn there, triple push
+             board[LAST_TO] = 256*(r + d) + c;
+             c = *p++ - AAA;
+             if(c >= BOARD_LEFT && c < BOARD_RGHT) { // mover explicitly mentioned
+                 if(*p >= '0' && *p <='9') r = board[EP_RANK] = *p++ - ONE;
+                 board[LAST_TO] = 256*r + c;
+                 if(!(board[EP_RANK]-r & 1)) board[EP_RANK] |= 128;
+             }
+         }
       }
     }
 
