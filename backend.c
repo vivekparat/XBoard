@@ -261,7 +261,7 @@ void ics_update_width P((int new_width));
 extern char installDir[MSG_SIZ];
 VariantClass startVariant; /* [HGM] nicks: initial variant */
 Boolean abortMatch;
-int deadRanks;
+int deadRanks, handSize;
 
 extern int tinyLayout, smallLayout;
 ChessProgramStats programStats;
@@ -2485,7 +2485,7 @@ CopyHoldings (Board board, char *holdings, ChessSquare lowestPiece)
     if( (int)lowestPiece >= BlackPawn ) {
         holdingsColumn = 0;
         countsColumn = 1;
-        holdingsStartRow = BOARD_HEIGHT-1;
+        holdingsStartRow = handSize-1;
         direction = -1;
     } else {
         holdingsColumn = BOARD_WIDTH-1;
@@ -2494,7 +2494,7 @@ CopyHoldings (Board board, char *holdings, ChessSquare lowestPiece)
         direction = 1;
     }
 
-    for(i=0; i<BOARD_HEIGHT; i++) { /* clear holdings */
+    for(i=0; i<BOARD_RANKS-1; i++) { /* clear holdings */
         board[i][holdingsColumn] = EmptySquare;
         board[i][countsColumn]   = (ChessSquare) 0;
     }
@@ -6129,19 +6129,19 @@ Prelude (Board board)
 	j = seed%4;		    seed /= 4;
 	p = board[0][BOARD_LEFT+j];   board[0][BOARD_LEFT+j] = EmptySquare; k = PieceToNumber(p);
 	board[k][BOARD_WIDTH-1] = p;  board[k][BOARD_WIDTH-2]++;
-	board[BOARD_HEIGHT-1-k][0] = WHITE_TO_BLACK p;  board[BOARD_HEIGHT-1-k][1]++;
+	board[handSize-1-k][0] = WHITE_TO_BLACK p;  board[handSize-1-k][1]++;
 	j = seed%3 + (seed%3 >= j); seed /= 3;
 	p = board[0][BOARD_LEFT+j];   board[0][BOARD_LEFT+j] = EmptySquare; k = PieceToNumber(p);
 	board[k][BOARD_WIDTH-1] = p;  board[k][BOARD_WIDTH-2]++;
-	board[BOARD_HEIGHT-1-k][0] = WHITE_TO_BLACK p;  board[BOARD_HEIGHT-1-k][1]++;
+	board[handSize-1-k][0] = WHITE_TO_BLACK p;  board[handSize-1-k][1]++;
 	j = seed%3;		    seed /= 3;
 	p = board[0][BOARD_LEFT+j+5]; board[0][BOARD_LEFT+j+5] = EmptySquare; k = PieceToNumber(p);
 	board[k][BOARD_WIDTH-1] = p;  board[k][BOARD_WIDTH-2]++;
-	board[BOARD_HEIGHT-1-k][0] = WHITE_TO_BLACK p;  board[BOARD_HEIGHT-1-k][1]++;
+	board[handSize-1-k][0] = WHITE_TO_BLACK p;  board[handSize-1-k][1]++;
 	j = seed%2 + (seed%2 >= j); seed /= 2;
 	p = board[0][BOARD_LEFT+j+5]; board[0][BOARD_LEFT+j+5] = EmptySquare; k = PieceToNumber(p);
 	board[k][BOARD_WIDTH-1] = p;  board[k][BOARD_WIDTH-2]++;
-	board[BOARD_HEIGHT-1-k][0] = WHITE_TO_BLACK p;  board[BOARD_HEIGHT-1-k][1]++;
+	board[handSize-1-k][0] = WHITE_TO_BLACK p;  board[handSize-1-k][1]++;
 	j = seed%4; seed /= 4; put(board, exoPieces[3],    0, j, ANY);
 	j = seed%3; seed /= 3; put(board, exoPieces[2],   0, j, ANY);
 	j = seed%2; seed /= 2; put(board, exoPieces[1], 0, j, ANY);
@@ -6366,6 +6366,7 @@ InitPosition (int redraw)
     if(BOARD_HEIGHT > BOARD_RANKS || BOARD_WIDTH > BOARD_FILES)
         DisplayFatalError(_("Recompile to support this BOARD_RANKS or BOARD_FILES!"), 0, 2);
 
+    handSize = BOARD_HEIGHT;
     pawnRow = gameInfo.boardHeight - 7; /* seems to work in all common variants */
     if(pawnRow < 1) pawnRow = 1;
     if(gameInfo.variant == VariantMakruk || gameInfo.variant == VariantASEAN ||
@@ -6443,8 +6444,8 @@ InitPosition (int redraw)
      if(gameInfo.variant == VariantGreat) { // promotion commoners
 	initialPosition[PieceToNumber(WhiteMan)][BOARD_WIDTH-1] = WhiteMan;
 	initialPosition[PieceToNumber(WhiteMan)][BOARD_WIDTH-2] = 9;
-	initialPosition[BOARD_HEIGHT-1-PieceToNumber(WhiteMan)][0] = BlackMan;
-	initialPosition[BOARD_HEIGHT-1-PieceToNumber(WhiteMan)][1] = 9;
+	initialPosition[handSize-1-PieceToNumber(WhiteMan)][0] = BlackMan;
+	initialPosition[handSize-1-PieceToNumber(WhiteMan)][1] = 9;
      }
      if( gameInfo.variant == VariantSChess ) {
       initialPosition[1][0] = BlackMarshall;
@@ -7160,7 +7161,7 @@ UserMoveEvent (int fromX, int fromY, int toX, int toY, int promoChar)
 	   if(appData.debugMode) fprintf(debugFP, "Drop move %d, curr=%d, x=%d,y=%d, p=%d\n",
 		moveType, currentMove, fromX, fromY, boards[currentMove][fromY][fromX]);
 	   // holdings might not be sent yet in ICS play; we have to figure out which piece belongs here
-	   if(fromX == 0) fromY = BOARD_HEIGHT-1 - fromY; // black holdings upside-down
+	   if(fromX == 0) fromY = handSize-1 - fromY; // black holdings upside-down
 	   fromX = fromX ? WhitePawn : BlackPawn; // first piece type in selected holdings
 	   while(PieceToChar(fromX) == '.' || PieceToChar(fromX) == '+' || PieceToNumber(fromX) != fromY && fromX != (int) EmptySquare) fromX++;
          fromY = DROP_RANK;
@@ -7217,7 +7218,7 @@ FinishMove (ChessMove moveType, int fromX, int fromY, int toX, int toY, int prom
 	if(WhiteOnMove(currentMove)) {
 	    if(!boards[currentMove][k][BOARD_WIDTH-2]) return 0;
 	} else {
-	    if(!boards[currentMove][BOARD_HEIGHT-1-k][1]) return 0;
+	    if(!boards[currentMove][handSize-1-k][1]) return 0;
 	}
     }
 
@@ -7884,8 +7885,8 @@ LeftClick (ClickType clickType, int xPix, int yPix)
 	    if(x == BOARD_LEFT-2 && piece >= BlackPawn) {
 		n = PieceToNumber(piece - (int)BlackPawn);
 		if(n >= gameInfo.holdingsSize) { n = 0; piece = BlackPawn; }
-		boards[currentMove][BOARD_HEIGHT-1 - n][0] = piece;
-		boards[currentMove][BOARD_HEIGHT-1 - n][1]++;
+		boards[currentMove][handSize-1 - n][0] = piece;
+		boards[currentMove][handSize-1 - n][1]++;
 	    } else
 	    if(x == BOARD_RGHT+1 && piece < BlackPawn) {
 		n = PieceToNumber(piece);
@@ -10512,10 +10513,10 @@ ApplyMove (int fromX, int fromY, int toX, int toY, int promoChar, Board board)
              p -= (int)BlackPawn;
 		 p = PieceToNumber((ChessSquare)p);
              if(p >= gameInfo.holdingsSize) p = 0;
-             if(--board[BOARD_HEIGHT-1-p][1] <= 0)
-                  board[BOARD_HEIGHT-1-p][0] = EmptySquare;
-             if((int)board[BOARD_HEIGHT-1-p][1] < 0)
-			board[BOARD_HEIGHT-1-p][1] = 0;
+             if(--board[handSize-1-p][1] <= 0)
+                  board[handSize-1-p][0] = EmptySquare;
+             if((int)board[handSize-1-p][1] < 0)
+			board[handSize-1-p][1] = 0;
         }
       }
       if (captured != EmptySquare && gameInfo.holdingsSize > 0
@@ -10545,8 +10546,8 @@ ApplyMove (int fromX, int fromY, int toX, int toY, int promoChar, Board board)
           }
           p = PieceToNumber((ChessSquare)p);
           if(p >= gameInfo.holdingsSize) { p = 0; captured = WhitePawn; }
-          board[BOARD_HEIGHT-1-p][1]++;
-          board[BOARD_HEIGHT-1-p][0] = WHITE_TO_BLACK captured;
+          board[handSize-1-p][1]++;
+          board[handSize-1-p][0] = WHITE_TO_BLACK captured;
 	}
       }
     } else if (gameInfo.variant == VariantAtomic) {
@@ -10586,8 +10587,8 @@ ApplyMove (int fromX, int fromY, int toX, int toY, int promoChar, Board board)
 	    if(!--board[k][BOARD_WIDTH-2])
 		board[k][BOARD_WIDTH-1] = EmptySquare;
 	} else {
-	    if(!--board[BOARD_HEIGHT-1-k][1])
-		board[BOARD_HEIGHT-1-k][0] = EmptySquare;
+	    if(!--board[handSize-1-k][1])
+		board[handSize-1-k][0] = EmptySquare;
 	}
     }
 }
@@ -15713,8 +15714,8 @@ EditPositionMenuEvent (ChessSquare selection, int x, int y)
                 if(x == BOARD_LEFT-2 && selection >= BlackPawn) {
                     n = PieceToNumber(selection - BlackPawn);
                     if(n >= gameInfo.holdingsSize) { n = 0; selection = BlackPawn; }
-                    boards[0][BOARD_HEIGHT-1-n][0] = selection;
-                    boards[0][BOARD_HEIGHT-1-n][1]++;
+                    boards[0][handSize-1-n][0] = selection;
+                    boards[0][handSize-1-n][1]++;
                 } else
                 if(x == BOARD_RGHT+1 && selection < BlackPawn) {
                     n = PieceToNumber(selection);
@@ -18615,8 +18616,8 @@ ParseFEN (Board board, int *blackPlaysFirst, char *fen, Boolean autoSize)
                     i = (int)piece - (int)BlackPawn;
 		    i = PieceToNumber((ChessSquare)i);
                     if( i >= gameInfo.holdingsSize ) return FALSE;
-                    board[BOARD_HEIGHT-1-i][0] = piece; /* black holdings */
-                    board[BOARD_HEIGHT-1-i][1]++;       /* black counts   */
+                    board[handSize-1-i][0] = piece; /* black holdings */
+                    board[handSize-1-i][1]++;       /* black counts   */
                     bcnt++;
                 } else {
                     i = (int)piece - (int)WhitePawn;
