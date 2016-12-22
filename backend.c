@@ -6712,12 +6712,13 @@ HasPromotionChoice (int fromX, int fromY, int toX, int toY, char *promoChoice, i
 
     piece = boards[currentMove][fromY][fromX];
     if(gameInfo.variant == VariantChu) {
-        promotionZoneSize = BOARD_HEIGHT/3;
+        promotionZoneSize = (BOARD_HEIGHT - deadRanks)/3;
         if(legal[toY][toX] == 6) return FALSE; // no promotion if highlights deny it
         highestPromotingPiece = (PieceToChar(piece) == '+' || PieceToChar(CHUPROMOTED(piece)) != '+') ? WhitePawn : WhiteKing;
     } else if(gameInfo.variant == VariantShogi) {
-        promotionZoneSize = BOARD_HEIGHT/3 +(BOARD_HEIGHT == 8);
+        promotionZoneSize = (BOARD_HEIGHT- deadRanks)/3 +(BOARD_HEIGHT == 8);
         highestPromotingPiece = (int)WhiteAlfil;
+        if(PieceToChar(piece) != '+' || PieceToChar(CHUPROMOTED(piece)) == '+') highestPromotingPiece = piece;
     } else if(gameInfo.variant == VariantMakruk || gameInfo.variant == VariantGrand || gameInfo.variant == VariantChuChess) {
         promotionZoneSize = 3;
     }
@@ -6735,9 +6736,9 @@ HasPromotionChoice (int fromX, int fromY, int toX, int toY, char *promoChoice, i
         if(fromY < promotionZoneSize && gameInfo.variant == VariantChuChess) return FALSE;
         highestPromotingPiece = WHITE_TO_BLACK highestPromotingPiece;
     } else {
-        if(  toY < BOARD_HEIGHT - promotionZoneSize &&
-           fromY < BOARD_HEIGHT - promotionZoneSize) return FALSE;
-        if(fromY >= BOARD_HEIGHT - promotionZoneSize && gameInfo.variant == VariantChuChess)
+        if(  toY < BOARD_HEIGHT - deadRanks - promotionZoneSize &&
+           fromY < BOARD_HEIGHT - deadRanks - promotionZoneSize) return FALSE;
+        if(fromY >= BOARD_HEIGHT - deadRanks - promotionZoneSize && gameInfo.variant == VariantChuChess)
              return FALSE;
     }
 
@@ -6753,9 +6754,9 @@ HasPromotionChoice (int fromX, int fromY, int toX, int toY, char *promoChoice, i
 		return FALSE;
 	    }
 	} else {
-	    if(toY == BOARD_HEIGHT-1 && piece == WhitePawn ||
-	       toY == BOARD_HEIGHT-1 && piece == WhiteQueen ||
-	       toY >= BOARD_HEIGHT-2 && piece == WhiteKnight) {
+	    if(toY == BOARD_HEIGHT-deadRanks-1 && piece == WhitePawn ||
+	       toY == BOARD_HEIGHT-deadRanks-1 && piece == WhiteQueen ||
+	       toY >= BOARD_HEIGHT-deadRanks-2 && piece == WhiteKnight) {
 		*promoChoice = '+';
 		return FALSE;
 	    }
@@ -7500,9 +7501,9 @@ CanPromote (ChessSquare piece, int y)
 	  (gameInfo.variant == VariantShatranj || gameInfo.variant == VariantCourier ||
            gameInfo.variant == VariantMakruk) && !*engineVariant) return FALSE;
 	return (piece == BlackPawn && y <= zone ||
-		piece == WhitePawn && y >= BOARD_HEIGHT-1-zone ||
+		piece == WhitePawn && y >= BOARD_HEIGHT-1-deadRanks-zone ||
 		piece == BlackLance && y <= zone ||
-		piece == WhiteLance && y >= BOARD_HEIGHT-1-zone );
+		piece == WhiteLance && y >= BOARD_HEIGHT-1-deadRanks-zone );
 }
 
 void
