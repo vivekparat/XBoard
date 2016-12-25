@@ -170,7 +170,7 @@ CopyBoard (Board to, Board from)
 {
     int i, j;
 
-    for (i = 0; i < BOARD_HEIGHT; i++)
+    for (i = 0; i < handSize; i++)
       for (j = 0; j < BOARD_WIDTH; j++)
 	to[i][j] = from[i][j];
     for (j = 0; j < BOARD_FILES; j++) // [HGM] gamestate: copy castling rights and ep status
@@ -1826,7 +1826,7 @@ LegalDrop (Board board, int flags, ChessSquare piece, int rt, int ft)
 if(appData.debugMode) fprintf(debugFP, "LegalDrop: %d @ %d,%d)\n", piece, ft, rt);
     if(board[rt][ft] != EmptySquare) return ImpossibleMove; // must drop to empty square
     n = PieceToNumber(piece);
-    if((gameInfo.holdingsWidth == 0 || (flags & F_WHITE_ON_MOVE ? board[n][BOARD_WIDTH-1] : board[BOARD_HEIGHT-1-n][0]) != piece)
+    if((gameInfo.holdingsWidth == 0 || (flags & F_WHITE_ON_MOVE ? board[n][BOARD_WIDTH-1] : board[handSize-1-n][0]) != piece)
 	&& gameInfo.variant != VariantBughouse) // in bughouse we don't check for availability, because ICS doesn't always tell us
         return ImpossibleMove; // piece not available
     if(gameInfo.variant == VariantShogi) { // in Shogi lots of drops are forbidden!

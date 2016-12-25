@@ -2068,6 +2068,7 @@ static int TranslatePieceToFontPiece( int piece )
     case WhiteSilver:
         return PM_WSG;
     case WhiteLance:
+
         return PM_WL;
     case WhiteFalcon:
         return PM_WV;
@@ -5351,6 +5352,7 @@ WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
       ForwardEvent();
       SetFocus(hwndMain);
       break;
+
 
     case IDM_ToStart:
       ToStartEvent();
@@ -8874,7 +8876,7 @@ DisplayIcsInteractionTitle(char *str)
 }
 
 void
-DrawPosition(int fullRedraw, Board board)
+DrawPositionX(int fullRedraw, Board board)
 {
   HDCDrawPosition(NULL, (BOOLEAN) fullRedraw, board); 
 }
@@ -9680,6 +9682,7 @@ OpenRcmd(char* host, char* user, char* cmd, ProcRef* pr)
       return WSAEADDRINUSE;
     }
     if (s == INVALID_SOCKET) {
+
       if ((s = socket(PF_INET, SOCK_STREAM, 0)) == INVALID_SOCKET) {
 	err = WSAGetLastError();
 	WSACleanup();

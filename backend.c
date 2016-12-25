@@ -261,7 +261,7 @@ void ics_update_width P((int new_width));
 extern char installDir[MSG_SIZ];
 VariantClass startVariant; /* [HGM] nicks: initial variant */
 Boolean abortMatch;
-int deadRanks, handSize;
+int deadRanks, handSize, handOffsets;
 
 extern int tinyLayout, smallLayout;
 ChessProgramStats programStats;
@@ -6359,14 +6359,14 @@ InitPosition (int redraw)
     }
     if(appData.holdingsSize >= 0) {
         i = appData.holdingsSize;
-        if(i > gameInfo.boardHeight) i = gameInfo.boardHeight;
+//        if(i > gameInfo.boardHeight) i = gameInfo.boardHeight;
         gameInfo.holdingsSize = i;
     }
     if(gameInfo.holdingsSize) gameInfo.holdingsWidth = 2;
     if(BOARD_HEIGHT > BOARD_RANKS || BOARD_WIDTH > BOARD_FILES)
         DisplayFatalError(_("Recompile to support this BOARD_RANKS or BOARD_FILES!"), 0, 2);
 
-    handSize = BOARD_HEIGHT;
+    if(!handSize) handSize = BOARD_HEIGHT;
     pawnRow = gameInfo.boardHeight - 7; /* seems to work in all common variants */
     if(pawnRow < 1) pawnRow = 1;
     if(gameInfo.variant == VariantMakruk || gameInfo.variant == VariantASEAN ||
@@ -6823,10 +6823,43 @@ InPalace (int row, int column)
 int
 PieceForSquare (int x, int y)
 {
-  if (x < 0 || x >= BOARD_WIDTH || y < 0 || y >= BOARD_HEIGHT)
-     return -1;
-  else
+  if (x < 0 || x >= BOARD_WIDTH || y < 0 || y >= BOARD_HEIGHT) return -1;
+  if(x == BOARD_RGHT+1 && handOffsets & 1) y += handSize - BOARD_HEIGHT;
+  if(x == BOARD_LEFT-2 && !(handOffsets & 2)) y += handSize - BOARD_HEIGHT;
      return boards[currentMove][y][x];
+}
+
+ChessSquare
+More (Board board, int col, int start, int end)
+{
+    int k;
+    for(k=start; k<end; k++) if(board[k][col]) return (col == 1 ? WhiteMonarch : BlackMonarch); // arrow image
+    return EmptySquare;
+}
+
+void
+DrawPosition (int repaint, Board board)
+{
+    Board compactedBoard;
+    if(handSize > BOARD_HEIGHT && board) {
+	int k;
+	CopyBoard(compactedBoard, board);
+	if(handOffsets & 1) {
+	    for(k=0; k<BOARD_HEIGHT; k++) {
+		compactedBoard[k][BOARD_WIDTH-1] = board[k+handSize-BOARD_HEIGHT][BOARD_WIDTH-1];
+		compactedBoard[k][BOARD_WIDTH-2] = board[k+handSize-BOARD_HEIGHT][BOARD_WIDTH-2];
+	    }
+	    compactedBoard[0][BOARD_WIDTH-1] = More(board, BOARD_WIDTH-2, 0, handSize-BOARD_HEIGHT+1);
+	} else compactedBoard[BOARD_HEIGHT-1][BOARD_WIDTH-1] = More(board, BOARD_WIDTH-2, BOARD_HEIGHT-1, handSize);
+	if(!(handOffsets & 2)) {
+	    for(k=0; k<BOARD_HEIGHT; k++) {
+		compactedBoard[k][0] = board[k+handSize-BOARD_HEIGHT][0];
+		compactedBoard[k][1] = board[k+handSize-BOARD_HEIGHT][1];
+	    }
+	    compactedBoard[0][0] = More(board, 1, 0, handSize-BOARD_HEIGHT+1);
+	} else compactedBoard[BOARD_HEIGHT-1][0] = More(board, 1, BOARD_HEIGHT-1, handSize);
+	DrawPositionX(TRUE, compactedBoard);
+    } else DrawPositionX(repaint, board);
 }
 
 int
@@ -7569,6 +7602,20 @@ LeftClick (ClickType clickType, int xPix, int yPix)
     }
     if (flipView && x >= 0) {
 	x = BOARD_WIDTH - 1 - x;
+    }
+
+    // map clicks in offsetted holdings back to true coords (or switch the offset)
+    if(x == BOARD_RGHT+1) {
+	if(handOffsets & 1) {
+	    if(y == 0) { handOffsets &= ~1; DrawPosition(TRUE, boards[currentMove]); return; }
+	    y += handSize - BOARD_HEIGHT;
+	} else if(y == BOARD_HEIGHT-1) { handOffsets |= 1; DrawPosition(TRUE, boards[currentMove]); return; }
+    }
+    if(x == BOARD_LEFT-2) {
+	if(!(handOffsets & 2)) {
+	    if(y == 0) { handOffsets |= 2; DrawPosition(TRUE, boards[currentMove]); return; }
+	    y += handSize - BOARD_HEIGHT;
+	} else if(y == BOARD_HEIGHT-1) { handOffsets &= ~2; DrawPosition(TRUE, boards[currentMove]); return; }
     }
 
     if(appData.monoMouse && gameMode == EditPosition && fromX < 0 && clickType == Press && boards[currentMove][y][x] == EmptySquare) {
@@ -9157,7 +9204,8 @@ FakeBookMove: // [HGM] book: we jump here to simulate machine moves after book h
         while(message[s] && message[s++] != ' ');
         if(BOARD_HEIGHT != h || BOARD_WIDTH != w + 4*(hand != 0) || gameInfo.holdingsSize != hand ||
            dummy == 4 && gameInfo.variant != StringToVariant(varName) ) { // engine wants to change board format or variant
-	    if(hand <= h) deadRanks = 0; else deadRanks = hand - h, h = hand; // adapt board to over-sized holdings
+//	    if(hand <= h) deadRanks = 0; else deadRanks = hand - h, h = hand; // adapt board to over-sized holdings
+	    if(hand > h) handSize = hand; else handSize = h;
 	    appData.NrFiles = w; appData.NrRanks = h; appData.holdingsSize = hand;
 	    if(dummy == 4) gameInfo.variant = StringToVariant(varName);     // parent variant
           InitPosition(1); // calls InitDrawingSizes to let new parameters take effect
@@ -12102,6 +12150,7 @@ Reset (int redraw, int init)
     }
     pieceDefs = FALSE; // [HGM] gen: reset engine-defined piece moves
     deadRanks = 0; // assume entire board is used
+    handSize = 0;
     for(i=0; i<EmptySquare; i++) { FREE(pieceDesc[i]); pieceDesc[i] = NULL; }
     CleanupTail(); // [HGM] vari: delete any stored variations
     CommentPopDown(); // [HGM] make sure no comments to the previous game keep hanging on
@@ -15647,7 +15696,7 @@ EditPositionMenuEvent (ChessSquare selection, int x, int y)
 	} else {
             if(x < BOARD_LEFT || x >= BOARD_RGHT) {
                 if(x == BOARD_LEFT-2) {
-                    if(y < BOARD_HEIGHT-1-gameInfo.holdingsSize) break;
+                    if(y < handSize-1-gameInfo.holdingsSize) break;
                     boards[0][y][1] = 0;
                 } else
                 if(x == BOARD_RGHT+1) {
@@ -18337,9 +18386,9 @@ PositionToFEN (int move, char *overrideCastling, int moveCounts)
                   *p++ = PieceToChar(piece);
         }
         for(i=0; i<gameInfo.holdingsSize; i++) { /* black holdings */
-            piece = boards[move][BOARD_HEIGHT-i-1][0];
+            piece = boards[move][handSize-i-1][0];
             if( piece != EmptySquare )
-              for(j=0; j<(int) boards[move][BOARD_HEIGHT-i-1][1]; j++)
+              for(j=0; j<(int) boards[move][handSize-i-1][1]; j++)
                   *p++ = PieceToChar(piece);
         }
 
@@ -18593,7 +18642,7 @@ ParseFEN (Board board, int *blackPlaysFirst, char *fen, Boolean autoSize)
 
     /* [HGM] by default clear Crazyhouse holdings, if present */
     if(gameInfo.holdingsWidth) {
-       for(i=0; i<BOARD_HEIGHT; i++) {
+       for(i=0; i<handSize; i++) {
            board[i][0]             = EmptySquare; /* black holdings */
            board[i][BOARD_WIDTH-1] = EmptySquare; /* white holdings */
            board[i][1]             = (ChessSquare) 0; /* black counts */
@@ -18644,9 +18693,9 @@ ParseFEN (Board board, int *blackPlaysFirst, char *fen, Boolean autoSize)
                     if(board[BOARD_HEIGHT-1][j] == ClearBoard) {
                         if(!bcnt) return FALSE;
                         if(n >= bcnt) n = rand() % bcnt; // use same randomization for black and white if possible
-                        for(k=0, m=n; k<gameInfo.holdingsSize; k++) if((n -= board[BOARD_HEIGHT-1-k][1]) < 0) {
-                            board[BOARD_HEIGHT-1][j] = board[BOARD_HEIGHT-1-k][0]; bcnt--;
-                            if(--board[BOARD_HEIGHT-1-k][1] == 0) board[BOARD_HEIGHT-1-k][0] = EmptySquare;
+                        for(k=0, m=n; k<gameInfo.holdingsSize; k++) if((n -= board[handSize-1-k][1]) < 0) {
+                            board[BOARD_HEIGHT-1][j] = board[handSize-1-k][0]; bcnt--;
+                            if(--board[handSize-1-k][1] == 0) board[handSize-1-k][0] = EmptySquare;
                             break;
                         }
                     }

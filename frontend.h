@@ -80,6 +80,7 @@ void DisplayIcsInteractionTitle P((String title));
 void ParseArgsFromString P((char *p));
 void ParseArgsFromFile P((FILE *f));
 void DrawPosition P((int fullRedraw, Board board));
+void DrawPositionX P((int fullRedraw, Board board));
 void ResetFrontEnd P((void));
 void NotifyFrontendLogin P((void));
 void CommentPopUp P((String title, String comment));

@@ -914,7 +914,7 @@ SquareExpose(int i, int j, int d)
 }
 
 void
-DrawPosition (int repaint, Board board)
+DrawPositionX (int repaint, Board board)
 {
     int i, j, do_flash, exposeAll = False;
     static int lastFlipView = 0;
