@@ -4907,7 +4907,7 @@ ParseBoard12 (char *string)
                && gameInfo.variant != VariantGrand&& gameInfo.variant != VariantSChess) // inherit info that ICS does not give from previous board
               for(k=0; k<ranks; k++) for(j=BOARD_LEFT; j<BOARD_RGHT; j++) {
                 ChessSquare old, new = boards[moveNum][k][j];
-                  if(fromY == DROP_RANK && k==toY && j==toX) continue; // dropped pieces always stand for themselves
+                  if(new == EmptySquare || fromY == DROP_RANK && k==toY && j==toX) continue; // dropped pieces always stand for themselves
                   old = (k==toY && j==toX) ? boards[moveNum-1][fromY][fromX] : boards[moveNum-1][k][j]; // trace back mover
                   if(old == new) continue;
                   if(old == PROMOTED(new)) boards[moveNum][k][j] = old;// prevent promoted pieces to revert to primordial ones
@@ -4915,7 +4915,7 @@ ParseBoard12 (char *string)
                       if(old < WhiteCannon || old >= BlackPawn && old < BlackCannon)
                            boards[moveNum][k][j] = PROMOTED(old); // choose correct type of Gold in promotion
                       else boards[moveNum][k][j] = old; // preserve type of Gold
-                  } else if((old == WhitePawn || old == BlackPawn) && new != EmptySquare) // Pawn promotions (but not e.p.capture!)
+                  } else if(old == WhitePawn || old == BlackPawn) // Pawn promotions (but not e.p.capture!)
                       boards[moveNum][k][j] = PROMOTED(new); // use non-primordial representation of chosen piece
               }
 	  } else {
