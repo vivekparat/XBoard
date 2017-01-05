@@ -14784,18 +14784,25 @@ EditTagsEvent ()
 }
 
 void
+StartSecond ()
+{
+    if(WaitForEngine(&second, StartSecond)) return;
+    InitChessProgram(&second, FALSE);
+    FeedMovesToProgram(&second, currentMove);
+
+    SendToProgram("analyze\n", &second);
+    second.analyzing = TRUE;
+    ThawUI();
+}
+
+void
 ToggleSecond ()
 {
   if(second.analyzing) {
     SendToProgram("exit\n", &second);
     second.analyzing = FALSE;
   } else {
-    if (second.pr == NoProc) StartChessProgram(&second);
-    InitChessProgram(&second, FALSE);
-    FeedMovesToProgram(&second, currentMove);
-
-    SendToProgram("analyze\n", &second);
-    second.analyzing = TRUE;
+    StartSecond();
   }
 }
 
@@ -17398,7 +17405,7 @@ FeatureDone (ChessProgramState *cps, int val)
   DelayedEventCallback cb = GetDelayedEvent();
   if ((cb == InitBackEnd3 && cps == &first) ||
       (cb == SettingsMenuIfReady && cps == &second) ||
-      (cb == LoadEngine) ||
+      (cb == LoadEngine) || (cb == StartSecond) ||
       (cb == TwoMachinesEventIfReady)) {
     CancelDelayedEvent();
     ScheduleDelayedEvent(cb, val ? 1 : 3600000);
