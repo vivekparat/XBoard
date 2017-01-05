@@ -17362,6 +17362,8 @@ ParseOption (Option *opt, ChessProgramState *cps)
 	    opt->type = SaveButton;
 	} else return FALSE;
 	*p = 0; // terminate option name
+	*(int*) (opt->name + MSG_SIZ - 104) = opt->value; // hide default values somewhere
+	if(opt->target == &opt->textValue) strncpy(opt->name + MSG_SIZ - 100, opt->textValue, 99);
 	// now look if the command-line options define a setting for this engine option.
 	if(cps->optionSettings && cps->optionSettings[0])
 	    p = strstr(cps->optionSettings, opt->name); else p = NULL;
@@ -17374,6 +17376,8 @@ ParseOption (Option *opt, ChessProgramState *cps)
 			    if(!strcmp(((char**)opt->textValue)[n], q+1)) opt->value = n;
 			break;
 		    case TextBox:
+		    case FileName:
+		    case PathName:
 			safeStrCpy(opt->textValue, q+1, MSG_SIZ - (opt->textValue - opt->name));
 			break;
 		    case Spin:
@@ -17385,8 +17389,6 @@ ParseOption (Option *opt, ChessProgramState *cps)
 		strcat(buf, "\n");
 		SendToProgram(buf, cps);
 	}
-	*(int*) (opt->name + MSG_SIZ - 104) = opt->value; // hide default values somewhere
-	if(opt->target == &opt->textValue) strncpy(opt->name + MSG_SIZ - 100, opt->textValue, 99);
 	return TRUE;
 }
 
