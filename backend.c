@@ -11449,6 +11449,7 @@ RecentEngineEvent (int nr)
     if(mnemonic[n]) { // if somehow the engine with the selected nickname is no longer found in the list, we skip
 	ReplaceEngine(&first, 0);
 	FloatToFront(&appData.recentEngineList, command[n]);
+	ASSIGN(currentEngine[0], command[n]);
     }
 }
 
