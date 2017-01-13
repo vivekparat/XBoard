@@ -1186,9 +1186,9 @@ ParseArgs(GetFunc get, void *cl)
         break;
       }
       if(replace) { // previous -replace option makes this string option conditional
-	char *p = (char*) replace;
+	int differs = strcmp(*(char**) ad->argLoc, (char*) replace);
 	free(replace); replace = NULL; // but expires in the process
-        if(strcmp(*(char**) ad->argLoc, p)) break; // only use to replace the given string
+        if(differs) break; // only use to replace the given string
       }
       ASSIGN(*(char **) ad->argLoc, argValue);
       break;
