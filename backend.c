@@ -7581,6 +7581,7 @@ void ReportClick(char *action, int x, int y)
 
 Boolean right; // instructs front-end to use button-1 events as if they were button 3
 Boolean deferChoice;
+int createX = -1, createY = -1; // square where we last created a piece in EditPosition mode
 
 void
 LeftClick (ClickType clickType, int xPix, int yPix)
@@ -7618,12 +7619,15 @@ LeftClick (ClickType clickType, int xPix, int yPix)
 	} else if(y == BOARD_HEIGHT-1) { handOffsets &= ~2; DrawPosition(TRUE, boards[currentMove]); return; }
     }
 
-    if(appData.monoMouse && gameMode == EditPosition && fromX < 0 && clickType == Press && boards[currentMove][y][x] == EmptySquare) {
+    if(appData.monoMouse && gameMode == EditPosition && fromX < 0 && clickType == Press && 
+	(boards[currentMove][y][x] == EmptySquare || x == createX && y == createY) ) {
 	static int dummy;
 	RightClick(clickType, xPix, yPix, &dummy, &dummy);
 	right = TRUE;
 	return;
     }
+
+    createX = createY = -1;
 
     if(SeekGraphClick(clickType, xPix, yPix, 0)) return;
 
@@ -8055,9 +8059,15 @@ RightClick (ClickType action, int x, int y, int *fromX, int *fromY)
 	if (xSqr == BOARD_LEFT-1 || xSqr == BOARD_RGHT) return -1;
 	if (xSqr < 0 || ySqr < 0) return -1;
 	if(appData.pieceMenu) { whichMenu = 0; break; } // edit-position menu
+	if(flipView) xSqr = BOARD_WIDTH - 1 - xSqr; else ySqr = BOARD_HEIGHT - 1 - ySqr;
+	if(xSqr == createX && ySqr == createY && xSqr != BOARD_LEFT-2 && xSqr != BOARD_RGHT+1) {
+	    ChessSquare p = boards[currentMove][ySqr][xSqr];
+	    do { if(++p == EmptySquare) p = WhitePawn; } while(PieceToChar(p) == '.');
+	    boards[currentMove][ySqr][xSqr] = p; DrawPosition(FALSE, boards[currentMove]);
+	    return -2;
+        }
 	pieceSweep = shiftKey ? BlackPawn : WhitePawn;  // [HGM] sweep: prepare selecting piece by mouse sweep
-	toX = xSqr; toY = ySqr; lastX = x, lastY = y;
-	if(flipView) toX = BOARD_WIDTH - 1 - toX; else toY = BOARD_HEIGHT - 1 - toY;
+	createX = toX = xSqr; createY = toY = ySqr; lastX = x, lastY = y;
 	NextPiece(0);
 	return 2; // grab
       case IcsObserving:
