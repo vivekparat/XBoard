@@ -4741,7 +4741,13 @@ ParseBoard12 (char *string)
     boards[moveNum][EP_STATUS] = EP_NONE;
     if(str[0] == 'P') boards[moveNum][EP_STATUS] = EP_PAWN_MOVE;
     if(strchr(move_str, 'x')) boards[moveNum][EP_STATUS] = EP_CAPTURE;
-    if(double_push !=  -1) boards[moveNum][EP_STATUS] = double_push + BOARD_LEFT;
+    if(double_push !=  -1) {
+	int dir = WhiteOnMove(moveNum) ? 1 : -1, last = BOARD_HEIGHT-1;
+	boards[moveNum][EP_FILE] = // also set new e.p. variables
+	boards[moveNum][EP_STATUS] = double_push + BOARD_LEFT;
+	boards[moveNum][EP_RANK] = (last + 3*dir)/2;
+	boards[moveNum][LAST_TO] = 128*(last + dir) + boards[moveNum][EP_FILE];
+    } else boards[moveNum][EP_FILE] = boards[moveNum][EP_RANK] = 100;
 
 
     if (ics_getting_history == H_GOT_REQ_HEADER ||
