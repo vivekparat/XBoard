@@ -6348,10 +6348,11 @@ InitPosition (int redraw)
       shuffleOpenings = 1;
       break;
     case VariantNoCastle:
-      pieces = FIDEArray;
-      nrCastlingRights = 0;
       /* !!?unconstrained back-rank shuffle */
       shuffleOpenings = 1;
+    case VariantSuicide:
+      pieces = FIDEArray;
+      nrCastlingRights = 0;
       break;
     }
 
