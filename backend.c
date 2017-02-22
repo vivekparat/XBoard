@@ -8641,7 +8641,7 @@ Adjudicate (ChessProgramState *cps)
 				i++;
 			}
 		}
-                if( count >= 100)
+                if( count >= 100 && gameInfo.variant != VariantMakruk) // do not accept 50-move claims in Makruk
                          boards[forwardMostMove][EP_STATUS] = EP_RULE_DRAW;
                          /* this is used to judge if draw claims are legal */
                 if(canAdjudicate && appData.ruleMoves > 0 && count >= 2*appData.ruleMoves) {
