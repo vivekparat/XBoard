@@ -8507,6 +8507,32 @@ Adjudicate (ChessProgramState *cps)
                           return 1;
                      }
                 } else moveCount = 6;
+
+                if(gameInfo.variant == VariantMakruk && // Makruk counting rules
+                  (nrW == 1 || nrB == 1 || nr[WhitePawn] + nr[BlackPawn] == 0)) { // which only kick in when pawnless or bare King
+                    int maxcnt, his, mine, c, wom = WhiteOnMove(forwardMostMove);
+                    count = forwardMostMove;
+                    while(count >= backwardMostMove) {
+                        int np = nr[WhitePawn] + nr[BlackPawn];
+                        if(wom) mine = nrW, his = nrB, c = BlackPawn;
+                        else    mine = nrB, his = nrW, c = WhitePawn;
+                        if(mine > 1 && np) { count++; break; }
+                        if(mine > 1) maxcnt = 64; else
+                        maxcnt = (nr[WhiteRook+c] > 1 ? 8 : nr[WhiteRook+c] ? 16 : nr[WhiteMan+c] > 1 ? 22 :
+                                                            nr[WhiteKnight+c] > 1 ? 32 : nr[WhiteMan+c] ? 44 : 64) - his - 1;
+                        while(boards[count][EP_STATUS] != EP_CAPTURE && count > backwardMostMove) count--; // seek previous character
+                        if(count == backwardMostMove) break;
+                        if(forwardMostMove - count >= 2*maxcnt + 1 - (mine == 1)) break;
+                        Count(boards[--count], nr, &nrW, &nrB, &staleW, &staleB, &bishopColor);
+                    }
+                    if(forwardMostMove - count >= 2*maxcnt + 1 - (mine == 1)) {
+                        boards[forwardMostMove][EP_STATUS] = EP_RULE_DRAW;
+                        if(canAdjudicate && appData.ruleMoves >= 0) {
+                            GameEnds( GameIsDrawn, "Xboard adjudication: counting rule", GE_XBOARD );
+                            return 1;
+                        }
+                    }
+                }
 	    }
 
 	// Repetition draws and 50-move rule can be applied independently of legality testing
