@@ -113,6 +113,7 @@ char *secondEngineLine;
 char *icsNick;
 char *theme;
 char *replace;
+char *engineListFile;
 
 void EnsureOnScreen(int *x, int *y, int minX, int minY);
 char StringGet(void *getClosure);
@@ -518,6 +519,7 @@ ArgDescriptor argDescriptors[] = {
   { "secondChessProgramNames", ArgString, (void *) &secondChessProgramNames,
     !XBOARD, (ArgIniType) SCP_NAMES },
   { "themeNames", ArgString, (void *) &appData.themeNames, TRUE, (ArgIniType) "native -upf false -ub false -ubt false -pid \"\"\n" },
+  { "engineList", ArgFilename, (void *) &engineListFile, TRUE, (ArgIniType) "" },
   { "addMasterOption", ArgMaster, NULL, FALSE, INVALID },
   { "installEngine", ArgInstall, (void *) &firstChessProgramNames, FALSE, (ArgIniType) "" },
   { "installTheme", ArgInstall, (void *) &appData.themeNames, FALSE, (ArgIniType) "" },
@@ -1435,6 +1437,9 @@ InitAppData(char *lpCmdLine)
 
   /* Parse command line */
   ParseArgs(StringGet, &lpCmdLine);
+
+  /* if separate engine list is used, parse that too */
+  if(*engineListFile) ParseSettingsFile(engineListFile, &engineListFile);
 
   if(appData.viewer && appData.viewerOptions[0]) ParseArgsFromString(appData.viewerOptions);
   if(appData.tourney && appData.tourneyOptions[0]) ParseArgsFromString(appData.tourneyOptions);

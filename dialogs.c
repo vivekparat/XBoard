@@ -1216,7 +1216,7 @@ static int
 NewTagsCallback (int n)
 {
     if(bookUp) SaveToBook(tagsText), DisplayBook(currentMove); else
-    if(resPtr) { ASSIGN(*resPtr, tagsText); } else
+    if(resPtr) { ASSIGN(*resPtr, tagsText); if(resPtr == &firstChessProgramNames) SaveEngineList(); } else
     ReplaceTags(tagsText, &gameInfo);
     return 1;
 }
@@ -1557,6 +1557,7 @@ EngSel (int n, int sel)
 static void
 LoadEngineProc (int engineNr, char *title)
 {
+   if(*engineListFile) ParseSettingsFile(engineListFile, &engineListFile); // contains engine list
    isUCI = isUSI = storeVariant = v1 = useNick = False; addToList = hasBook = True; // defaults
    secondEng = engineNr;
    if(engineLine)   free(engineLine);   engineLine = strdup("");

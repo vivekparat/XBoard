@@ -940,6 +940,16 @@ FloatToFront(char **list, char *engineLine)
 }
 
 void
+SaveEngineList ()
+{
+	FILE *f;
+	if(*engineListFile && (f = fopen(engineListFile, "w"))) {
+	  fprintf(f, "-firstChessProgramNames {%s}\n", firstChessProgramNames);
+	  fclose(f);
+	}
+}
+
+void
 AddToEngineList (int i)
 {
 	int len;
@@ -962,6 +972,7 @@ AddToEngineList (int i)
 	if(insert != q) insert[-1] = NULLCHAR;
 	snprintf(firstChessProgramNames, len, "%s\n%s\n%s", q, buf, insert);
 	if(q) 	free(q);
+	SaveEngineList();
 	FloatToFront(&appData.recentEngineList, buf);
 	ASSIGN(currentEngine[i], buf);
 }

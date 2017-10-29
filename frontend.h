@@ -126,6 +126,7 @@ int LoadGameTimerRunning P((void));
 int StopLoadGameTimer P((void));
 void StartLoadGameTimer P((long millisec));
 void AutoSaveGame P((void));
+Boolean ParseSettingsFile P((char *name, char **addr));
 
 void ScheduleDelayedEvent P((DelayedEventCallback cb, long millisec));
 DelayedEventCallback GetDelayedEvent P((void));
@@ -215,6 +216,7 @@ void ChangeDragPiece P((ChessSquare piece));
 void CopyFENToClipboard P((void));
 extern char *programName;
 extern int commentUp;
+extern char *engineListFile;
 extern char *firstChessProgramNames;
 extern char *icsTextMenuString;
 extern int mute;
