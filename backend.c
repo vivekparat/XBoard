@@ -913,13 +913,66 @@ InitEngine (ChessProgramState *cps, int n)
 
 ChessProgramState *savCps;
 
-GameMode oldMode;
+GameMode oldMode, tryNr;
+
+extern char *engineName, *engineDir, *engineChoice, *engineLine, *nickName, *params;
+extern Boolean isUCI, hasBook, storeVariant, v1, addToList, useNick;
+char *insert, *wbOptions, *currentEngine[2]; // point in ChessProgramNames were we should insert new engine
+static char newEngineCommand[MSG_SIZ];
+
+void
+FloatToFront(char **list, char *engineLine)
+{
+    char buf[MSG_SIZ], tidy[MSG_SIZ], *p = buf, *q, *r = buf;
+    int i=0;
+    if(appData.recentEngines <= 0) return;
+    TidyProgramName(engineLine, "localhost", tidy+1);
+    tidy[0] = buf[0] = '\n'; strcat(tidy, "\n");
+    strncpy(buf+1, *list, MSG_SIZ-50);
+    if(p = strstr(buf, tidy)) { // tidy name appears in list
+	q = strchr(++p, '\n'); if(q == NULL) return; // malformed, don't touch
+	while(*p++ = *++q); // squeeze out
+    }
+    strcat(tidy, buf+1); // put list behind tidy name
+    p = tidy + 1; while(q = strchr(p, '\n')) i++, r = p, p = q + 1; // count entries in new list
+    if(i > appData.recentEngines) *r = NULLCHAR; // if maximum rached, strip off last
+    ASSIGN(*list, tidy+1);
+}
+
+void
+AddToEngineList (int i)
+{
+	int len;
+	char quote, buf[MSG_SIZ];
+	char *q = firstChessProgramNames, *p = newEngineCommand;
+	if(nickName[0]) snprintf(buf, MSG_SIZ, "\"%s\" -fcp ", nickName); else buf[0] = NULLCHAR;
+	quote = strchr(p, '"') ? '\'' : '"'; // use single quotes around engine command if it contains double quotes
+	snprintf(buf+strlen(buf), MSG_SIZ-strlen(buf), "%c%s%c -fd \"%s\"%s%s%s%s%s%s%s%s",
+			quote, p, quote, appData.directory[i],
+			useNick ? " -fn \"" : "",
+			useNick ? nickName : "",
+			useNick ? "\"" : "",
+			v1 ? " -firstProtocolVersion 1" : "",
+			hasBook ? "" : " -fNoOwnBookUCI",
+			isUCI ? (isUCI == TRUE ? " -fUCI" : gameInfo.variant == VariantShogi ? " -fUSI" : " -fUCCI") : "",
+			storeVariant ? " -variant " : "",
+			storeVariant ? VariantName(gameInfo.variant) : "");
+	if(wbOptions && wbOptions[0]) snprintf(buf+strlen(buf), MSG_SIZ-strlen(buf), " %s", wbOptions);
+	firstChessProgramNames = malloc(len = strlen(q) + strlen(buf) + 2);
+	if(insert != q) insert[-1] = NULLCHAR;
+	snprintf(firstChessProgramNames, len, "%s\n%s\n%s", q, buf, insert);
+	if(q) 	free(q);
+	FloatToFront(&appData.recentEngineList, buf);
+	ASSIGN(currentEngine[i], buf);
+}
 
 void
 LoadEngine ()
 {
     int i;
     if(WaitForEngine(savCps, LoadEngine)) return;
+    if(tryNr == 1 && !isUCI) { SendToProgram("uci\n", savCps); tryNr = 2; ScheduleDelayedEvent(LoadEngine, FEATURE_TIMEOUT); return; }
+    if(tryNr) v1 = (tryNr == 2), tryNr = 0, AddToEngineList(0); // deferred to after protocol determination
     CommonEngineInit(); // recalculate time odds
     if(gameInfo.variant != StringToVariant(appData.variant)) {
 	// we changed variant when loading the engine; this forces us to reset
@@ -953,35 +1006,11 @@ ReplaceEngine (ChessProgramState *cps, int n)
     LoadEngine();
 }
 
-extern char *engineName, *engineDir, *engineChoice, *engineLine, *nickName, *params;
-extern Boolean isUCI, hasBook, storeVariant, v1, addToList, useNick;
-
 static char resetOptions[] =
 	"-reuse -firstIsUCI false -firstHasOwnBookUCI true -firstTimeOdds 1 "
 	"-firstInitString \"" INIT_STRING "\" -firstComputerString \"" COMPUTER_STRING "\" "
 	"-firstFeatures \"\" -firstLogo \"\" -firstAccumulateTC 1 -fd \".\" "
 	"-firstOptions \"\" -firstNPS -1 -fn \"\" -firstScoreAbs false";
-
-void
-FloatToFront(char **list, char *engineLine)
-{
-    char buf[MSG_SIZ], tidy[MSG_SIZ], *p = buf, *q, *r = buf;
-    int i=0;
-    if(appData.recentEngines <= 0) return;
-    TidyProgramName(engineLine, "localhost", tidy+1);
-    tidy[0] = buf[0] = '\n'; strcat(tidy, "\n");
-    strncpy(buf+1, *list, MSG_SIZ-50);
-    if(p = strstr(buf, tidy)) { // tidy name appears in list
-	q = strchr(++p, '\n'); if(q == NULL) return; // malformed, don't touch
-	while(*p++ = *++q); // squeeze out
-    }
-    strcat(tidy, buf+1); // put list behind tidy name
-    p = tidy + 1; while(q = strchr(p, '\n')) i++, r = p, p = q + 1; // count entries in new list
-    if(i > appData.recentEngines) *r = NULLCHAR; // if maximum rached, strip off last
-    ASSIGN(*list, tidy+1);
-}
-
-char *insert, *wbOptions, *currentEngine[2]; // point in ChessProgramNames were we should insert new engine
 
 void
 Load (ChessProgramState *cps, int i)
@@ -1025,30 +1054,8 @@ Load (ChessProgramState *cps, int i)
     appData.hasOwnBookUCI[i] = hasBook;
     if(!nickName[0]) useNick = FALSE;
     if(useNick) ASSIGN(appData.pgnName[i], nickName);
-    if(addToList) {
-	int len;
-	char quote;
-	q = firstChessProgramNames;
-	if(nickName[0]) snprintf(buf, MSG_SIZ, "\"%s\" -fcp ", nickName); else buf[0] = NULLCHAR;
-	quote = strchr(p, '"') ? '\'' : '"'; // use single quotes around engine command if it contains double quotes
-	snprintf(buf+strlen(buf), MSG_SIZ-strlen(buf), "%c%s%c -fd \"%s\"%s%s%s%s%s%s%s%s",
-			quote, p, quote, appData.directory[i],
-			useNick ? " -fn \"" : "",
-			useNick ? nickName : "",
-			useNick ? "\"" : "",
-			v1 ? " -firstProtocolVersion 1" : "",
-			hasBook ? "" : " -fNoOwnBookUCI",
-			isUCI ? (isUCI == TRUE ? " -fUCI" : gameInfo.variant == VariantShogi ? " -fUSI" : " -fUCCI") : "",
-			storeVariant ? " -variant " : "",
-			storeVariant ? VariantName(gameInfo.variant) : "");
-	if(wbOptions && wbOptions[0]) snprintf(buf+strlen(buf), MSG_SIZ-strlen(buf), " %s", wbOptions);
-	firstChessProgramNames = malloc(len = strlen(q) + strlen(buf) + 2);
-	if(insert != q) insert[-1] = NULLCHAR;
-	snprintf(firstChessProgramNames, len, "%s\n%s\n%s", q, buf, insert);
-	if(q) 	free(q);
-	FloatToFront(&appData.recentEngineList, buf);
-	ASSIGN(currentEngine[i], buf);
-    }
+    safeStrCpy(newEngineCommand, p, MSG_SIZ);
+    tryNr = 1;
     ReplaceEngine(cps, i);
 }
 
@@ -9227,7 +9234,7 @@ FakeBookMove: // [HGM] book: we jump here to simulate machine moves after book h
 	cps->useSigterm = FALSE;
     }
     if (strncmp(message, "feature ", 8) == 0) { // [HGM] moved forward to pre-empt non-compliant commands
-      ParseFeatures(message+8, cps);
+      ParseFeatures(message+8, cps); if(tryNr < 3) tryNr = 3;
       return; // [HGM] This return was missing, causing option features to be recognized as non-compliant commands!
     }
 
@@ -9436,6 +9443,11 @@ FakeBookMove: // [HGM] book: we jump here to simulate machine moves after book h
 	LeftClick(Press, x, y);
 	LeftClick(Release, x, y);
 	first.highlight = f;
+	return;
+    }
+    if(strncmp(message, "uciok", 5) == 0) { // response to "uci" probe
+	appData.isUCI[0] = isUCI = 1;
+	ReplaceEngine(&first, 0); // retry install as UCI
 	return;
     }
     /*
