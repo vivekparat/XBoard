@@ -228,7 +228,7 @@ typedef char *String;
 #define LOWTIMEWARNING_COLOR    "#FF0000"
 #define BELLCHAR                '\007'
 #define NULLCHAR                '\000'
-#define FEATURE_TIMEOUT         10000 /*ms*/
+#define FEATURE_TIMEOUT         1000 /*ms*/
 #define MATE_SCORE              100000
 
 #define CLOCK_FONT 0
