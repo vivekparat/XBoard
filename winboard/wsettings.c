@@ -790,6 +790,7 @@ EnterGroup(HWND hDlg)
 
 void LoadEnginePopUp(HWND hwnd, int nr)
 {
+    if(*engineListFile) ParseSettingsFile(engineListFile, &engineListFile); // contains engine list
     isUCI = isUCCI = storeVariant = v1 = useNick = FALSE; addToList = hasBook = TRUE; // defaults
     engineNr = nr;
     if(engineDir)    free(engineDir);    engineDir = strdup("");

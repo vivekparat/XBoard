@@ -270,6 +270,7 @@ VOID TagsPopUp(char *tags, char *msg)
 
 VOID EditTagsPopUp(char *tags, char **dest)
 {
+  if(resPtr == &firstChessProgramNames && *engineListFile) ParseSettingsFile(engineListFile, &engineListFile); // contains engine list
   resPtr = dest;
   EitherTagsPopUp(tags, "", TRUE);
 }
