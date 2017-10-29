@@ -11401,6 +11401,7 @@ SaveEngineSettings (int n)
 {
     int len; char *p, *q, *s, buf[MSG_SIZ], *optionSettings;
     if(!currentEngine[n] || !currentEngine[n][0]) { DisplayMessage("saving failed: engine not from list", ""); return; } // no engine from list is loaded
+    if(*engineListFile) ParseSettingsFile(engineListFile, &engineListFile); // update engine list
     p = strstr(firstChessProgramNames, currentEngine[n]);
     if(!p) { DisplayMessage("saving failed: engine not found in list", ""); return; } // sanity check; engine could be deleted from list after loading
     optionSettings = ResendOptions(n ? &second : &first, FALSE);
@@ -11420,6 +11421,7 @@ SaveEngineSettings (int n)
     s = malloc(len);
     snprintf(s, len, "%s%s%s", firstChessProgramNames, currentEngine[n], q);
     FREE(firstChessProgramNames); firstChessProgramNames = s; // new list
+    if(*engineListFile) SaveEngineList();
 }
 
 // following implemented as macro to avoid type limitations
