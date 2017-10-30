@@ -1060,13 +1060,13 @@ Load (ChessProgramState *cps, int i)
     }
     if(jar) { snprintf(buf3, MSG_SIZ, "java -jar %s", p); p = buf3; }
     ASSIGN(appData.chessProgram[i], p);
+    if(isUCI == 3) tryNr = 1, isUCI = 0; // auto-detect
     appData.isUCI[i] = isUCI;
     appData.protocolVersion[i] = v1 ? 1 : PROTOVER;
     appData.hasOwnBookUCI[i] = hasBook;
     if(!nickName[0]) useNick = FALSE;
     if(useNick) ASSIGN(appData.pgnName[i], nickName);
     safeStrCpy(newEngineCommand, p, MSG_SIZ);
-    tryNr = 1;
     ReplaceEngine(cps, i);
 }
 
