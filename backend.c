@@ -9246,7 +9246,7 @@ FakeBookMove: // [HGM] book: we jump here to simulate machine moves after book h
 	cps->useSigterm = FALSE;
     }
     if (strncmp(message, "feature ", 8) == 0) { // [HGM] moved forward to pre-empt non-compliant commands
-      ParseFeatures(message+8, cps); if(tryNr < 3) tryNr = 3;
+      ParseFeatures(message+8, cps); if(tryNr && tryNr < 3) tryNr = 3;
       return; // [HGM] This return was missing, causing option features to be recognized as non-compliant commands!
     }
 
