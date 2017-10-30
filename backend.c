@@ -983,7 +983,7 @@ LoadEngine ()
     int i;
     if(WaitForEngine(savCps, LoadEngine)) return;
     if(tryNr == 1 && !isUCI) { SendToProgram("uci\n", savCps); tryNr = 2; ScheduleDelayedEvent(LoadEngine, FEATURE_TIMEOUT); return; }
-    if(tryNr) v1 = (tryNr == 2), tryNr = 0, AddToEngineList(0); // deferred to after protocol determination
+    if(tryNr) v1 |= (tryNr == 2), tryNr = 0, AddToEngineList(0); // deferred to after protocol determination
     CommonEngineInit(); // recalculate time odds
     if(gameInfo.variant != StringToVariant(appData.variant)) {
 	// we changed variant when loading the engine; this forces us to reset
@@ -1012,7 +1012,7 @@ ReplaceEngine (ChessProgramState *cps, int n)
     appData.clockMode = TRUE;
     InitEngine(cps, n);
     UpdateLogos(TRUE);
-    if(n) return; // only startup first engine immediately; second can wait
+    if(n && !tryNr) return; // only startup first engine immediately; second can wait (unless autodetect)
     savCps = cps; // parameter to LoadEngine passed as globals, to allow scheduled calling :-(
     LoadEngine();
 }
@@ -9457,8 +9457,9 @@ FakeBookMove: // [HGM] book: we jump here to simulate machine moves after book h
 	return;
     }
     if(strncmp(message, "uciok", 5) == 0) { // response to "uci" probe
-	appData.isUCI[0] = isUCI = 1;
-	ReplaceEngine(&first, 0); // retry install as UCI
+	int nr = (cps == &second);
+	appData.isUCI[nr] = isUCI = 1;
+	ReplaceEngine(cps, nr); // retry install as UCI
 	return;
     }
     /*
