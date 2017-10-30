@@ -1060,6 +1060,7 @@ Load (ChessProgramState *cps, int i)
     }
     if(jar) { snprintf(buf3, MSG_SIZ, "java -jar %s", p); p = buf3; }
     ASSIGN(appData.chessProgram[i], p);
+    tryNr = 3; // requests adding to list without auto-detect
     if(isUCI == 3) tryNr = 1, isUCI = 0; // auto-detect
     appData.isUCI[i] = isUCI;
     appData.protocolVersion[i] = v1 ? 1 : PROTOVER;
