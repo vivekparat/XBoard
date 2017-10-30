@@ -1496,28 +1496,33 @@ RefreshSettingsDialog (ChessProgramState *cps, int val)
 
 //----------------------------------------------- Load Engine --------------------------------------
 
-char *engineDir, *engineLine, *nickName, *params;
+char *engineDir, *engineLine, *nickName, *params, *protocolChoice;
 Boolean isUCI, isUSI, hasBook, storeVariant, v1, addToList, useNick, secondEng;
 
 static void EngSel P((int n, int sel));
 static int InstallOK P((int n));
+
+static char *protocols[] = { "autodetect", "WB", "UCI", "USI/UCCI", "WB v1", NULL };
 
 static Option installOptions[] = {
 {   0,LR|T2T, 0, NULL, NULL, NULL, NULL, Label, N_("Select engine from list:") },
 { 300,LR|TB,200, NULL, (void*) engineMnemonic, (char*) &EngSel, NULL, ListBox, "" },
 { 0,SAME_ROW, 0, NULL, NULL, NULL, NULL, Break, NULL },
 {   0,  LR,   0, NULL, NULL, NULL, NULL, Label, N_("or specify one below:") },
+{   0,  0,    0, NULL, (void*) &engineName, NULL, NULL, FileName, N_("Engine Command:") },
+{   0,  LR,   0, NULL, NULL, NULL, NULL, Label, N_("------------- User preferences (optional) ---------------") },
 {   0,  0,    0, NULL, (void*) &nickName, NULL, NULL, TextBox, N_("Nickname (optional):") },
 {   0,  0,    0, NULL, (void*) &useNick, NULL, NULL, CheckBox, N_("Use nickname in PGN player tags of engine-engine games") },
-{   0,  0,    0, NULL, (void*) &engineDir, NULL, NULL, PathName, N_("Engine Directory:") },
-{   0,  0,    0, NULL, (void*) &engineName, NULL, NULL, FileName, N_("Engine Command:") },
-{   0,  LR,   0, NULL, NULL, NULL, NULL, Label, N_("(Directory will be derived from engine path when empty)") },
-{   0,  0,    0, NULL, (void*) &isUCI, NULL, NULL, CheckBox, N_("UCI") },
-{   0,  0,    0, NULL, (void*) &isUSI, NULL, NULL, CheckBox, N_("USI/UCCI (uses specified -uxiAdapter)") },
-{   0,  0,    0, NULL, (void*) &v1, NULL, NULL, CheckBox, N_("WB protocol v1 (do not wait for engine features)") },
+{   0,  0,    0, NULL, (void*) &storeVariant, NULL, NULL, CheckBox, N_("Force current variant with this engine") },
 {   0,  0,    0, NULL, (void*) &hasBook, NULL, NULL, CheckBox, N_("Must not use GUI book") },
 {   0,  0,    0, NULL, (void*) &addToList, NULL, NULL, CheckBox, N_("Add this engine to the list") },
-{   0,  0,    0, NULL, (void*) &storeVariant, NULL, NULL, CheckBox, N_("Force current variant with this engine") },
+{   0,  LR,   0, NULL, NULL, NULL, NULL, Label, N_("--------- Advanced (only change in exceptional cases) ----------") },
+{   0,  0,    5, NULL, (void*) &protocolChoice, (char*) protocols, protocols, ComboBox, N_("Engine Protocol:") },
+{   0,  0,    0, NULL, (void*) &engineDir, NULL, NULL, PathName, N_("Engine Directory:") },
+{   0,  LR,   0, NULL, NULL, NULL, NULL, Label, N_("(Directory will be derived from engine path when empty)") },
+//{   0,  0,    0, NULL, (void*) &isUCI, NULL, NULL, CheckBox, N_("UCI") },
+//{   0,  0,    0, NULL, (void*) &isUSI, NULL, NULL, CheckBox, N_("USI/UCCI (uses specified -uxiAdapter)") },
+//{   0,  0,    0, NULL, (void*) &v1, NULL, NULL, CheckBox, N_("WB protocol v1 (do not wait for engine features)") },
 {   0,  0,    0, NULL, (void*) &InstallOK, "", NULL, EndMark , "" }
 };
 
@@ -1526,6 +1531,12 @@ InstallOK (int n)
 {
     if(n && (n = SelectedListBoxItem(&installOptions[1])) > 0) { // called by pressing OK, and engine selected
 	ASSIGN(engineLine, engineList[n]);
+    } else switch(values[12]) {
+        case 0: isUCI = 3; break;
+        case 2: isUCI = 1; break;
+        case 3: isUSI = 1; break;
+        case 4: v1 = 1;
+        case 1: break;
     }
     PopDown(TransientDlg); // early popdown, to allow FreezeUI to instate grab
     if(isUSI) {
