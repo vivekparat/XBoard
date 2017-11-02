@@ -624,6 +624,7 @@ ArgDescriptor argDescriptors[] = {
   { "fixedSize", ArgBoolean, (void *) &appData.fixedSize, TRUE, (ArgIniType) FALSE },
   { "showMoveTime", ArgBoolean, (void *) &appData.moveTime, TRUE, (ArgIniType) FALSE },
   { "bmpSave", ArgInt, (void *) &appData.bmpSave, FALSE, 0 },
+  { "defaultEngineInstallDir", ArgFilename, (void *) &appData.defEngDir, FALSE, (ArgIniType) "." },
 
   // [HGM] tournament options
   { "tourneyFile", ArgFilename, (void *) &appData.tourneyFile, FALSE, (ArgIniType) "" },
@@ -1439,7 +1440,12 @@ InitAppData(char *lpCmdLine)
   ParseArgs(StringGet, &lpCmdLine);
 
   /* if separate engine list is used, parse that too */
-  if(*engineListFile) ParseSettingsFile(engineListFile, &engineListFile);
+  if(*engineListFile) {
+    char buf[MSG_SIZ];
+    MySearchPath(installDir, engineListFile, buf);
+    if(*buf) { ASSIGN(engineListFile, buf); }
+    ParseSettingsFile(engineListFile, &engineListFile);
+  }
 
   if(appData.viewer && appData.viewerOptions[0]) ParseArgsFromString(appData.viewerOptions);
   if(appData.tourney && appData.tourneyOptions[0]) ParseArgsFromString(appData.tourneyOptions);

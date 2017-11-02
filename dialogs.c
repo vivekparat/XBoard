@@ -1572,7 +1572,7 @@ LoadEngineProc (int engineNr, char *title)
    isUCI = isUSI = storeVariant = v1 = useNick = False; addToList = hasBook = True; // defaults
    secondEng = engineNr;
    if(engineLine)   free(engineLine);   engineLine = strdup("");
-   if(engineDir)    free(engineDir);    engineDir = strdup(".");
+   if(engineDir)    free(engineDir);    engineDir = strdup(appData.defEngDir);
    if(nickName)     free(nickName);     nickName = strdup("");
    if(params)       free(params);       params = strdup("");
    ASSIGN(engineMnemonic[0], "");

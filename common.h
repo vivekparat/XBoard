@@ -804,6 +804,7 @@ typedef struct {
 
     int recentEngines;
     char *recentEngineList;
+    char *defEngDir;
     char *message;
     char *suppress;
     char *fen;
