@@ -1568,7 +1568,9 @@ EngSel (int n, int sel)
 static void
 LoadEngineProc (int engineNr, char *title)
 {
+   int p = appData.defProtocol;
    if(*engineListFile) ParseSettingsFile(engineListFile, &engineListFile); // contains engine list
+   if(p >= 0 && p < 5) protocolChoice = protocols[p];
    isUCI = isUSI = storeVariant = v1 = useNick = False; addToList = hasBook = True; // defaults
    secondEng = engineNr;
    if(engineLine)   free(engineLine);   engineLine = strdup("");

@@ -625,6 +625,7 @@ ArgDescriptor argDescriptors[] = {
   { "showMoveTime", ArgBoolean, (void *) &appData.moveTime, TRUE, (ArgIniType) FALSE },
   { "bmpSave", ArgInt, (void *) &appData.bmpSave, FALSE, 0 },
   { "defaultEngineInstallDir", ArgFilename, (void *) &appData.defEngDir, FALSE, (ArgIniType) "." },
+  { "defaultInstallProtocol", ArgInt, (void *) &appData.defProtocol, TRUE, (ArgIniType) 0 },
 
   // [HGM] tournament options
   { "tourneyFile", ArgFilename, (void *) &appData.tourneyFile, FALSE, (ArgIniType) "" },

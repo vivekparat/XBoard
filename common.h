@@ -802,6 +802,7 @@ typedef struct {
     Boolean scoreWhite;
     Boolean pvSAN[ENGINES];
 
+    int defProtocol;
     int recentEngines;
     char *recentEngineList;
     char *defEngDir;
