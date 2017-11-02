@@ -952,6 +952,7 @@ SaveEngineList ()
 void
 AddToEngineList (int i)
 {
+    if(addToList) {
 	int len;
 	char quote, buf[MSG_SIZ];
 	char *q = firstChessProgramNames, *p = newEngineCommand;
@@ -975,6 +976,7 @@ AddToEngineList (int i)
 	SaveEngineList();
 	FloatToFront(&appData.recentEngineList, buf);
 	ASSIGN(currentEngine[i], buf);
+    }
 }
 
 void
