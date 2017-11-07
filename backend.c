@@ -9057,7 +9057,7 @@ FakeBookMove: // [HGM] book: we jump here to simulate machine moves after book h
                 GameEnds(cps->twoMachinesColor[0] == 'w' ? BlackWins : WhiteWins,
                            buf1, GE_XBOARD);
 		return;
-           } else if(!appData.fischerCastling)
+           } else if(!appData.fischerCastling && toX != BOARD_WIDTH>>1)
            /* [HGM] Kludge to handle engines that send FRC-style castling
               when they shouldn't (like TSCP-Gothic) */
            switch(moveType) {
