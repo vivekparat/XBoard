@@ -2401,9 +2401,9 @@ CoordsToAlgebraic (Board board, int flags, int rf, int ff, int rt, int ft, int p
             ((ff == BOARD_WIDTH>>1 && (ft == BOARD_LEFT+2 || ft == BOARD_RGHT-2)) ||
              (ff == (BOARD_WIDTH-1)>>1 && (ft == BOARD_LEFT+1 || ft == BOARD_RGHT-3)))) {
             if(ft==BOARD_LEFT+1 || ft==BOARD_RGHT-2)
-	      snprintf(out, MOVE_LEN, "O-O%c%c", promoChar ? '/' : 0, ToUpper(promoChar));
+	      snprintf(out, MOVE_LEN, "O-O%c%c%c", promoChar ? '/' : 0, ToUpper(promoChar), ff + AAA);
             else
-	      snprintf(out, MOVE_LEN, "O-O-O%c%c", promoChar ? '/' : 0, ToUpper(promoChar));
+	      snprintf(out, MOVE_LEN, "O-O-O%c%c%c", promoChar ? '/' : 0, ToUpper(promoChar), ff + AAA);
 
 	    /* This notation is always unambiguous, unless there are
 	       kings on both the d and e files, with "wild castling"
@@ -2478,8 +2478,15 @@ CoordsToAlgebraic (Board board, int flags, int rf, int ff, int rt, int ft, int p
             *outp++ = ToUpper(promoChar);
         }
         else if (gameInfo.variant == VariantSChess && promoChar) { // and in S-Chess we have gating
+            ChessSquare victim = board[rt][ft];
+            if(piece == WhiteRook && victim == WhiteKing ||
+               piece == BlackRook && victim == BlackKing) {
+                strncpy(out, "O-O-O", MOVE_LEN);
+                outp = out + 3 + 2*(ft > ff);
+            }
             *outp++ = '/';
             *outp++ = ToUpper(promoChar);
+            if(out[0] == 'O') *outp++ = ff + AAA;
         }
 	*outp = NULLCHAR;
         return cl.kind;

@@ -642,9 +642,12 @@ badMove:// we failed to find algebraic move
 		    Match("OO", p) || Match("oo", p) || Match("00", p)) castlingType = 1;
 	    if(castlingType) { //code from old parser, collapsed for both castling types, and streamlined a bit
 		int rf, ff, rt, ft; ChessSquare king;
-		char promo=NULLCHAR;
+		char promo=NULLCHAR, gate = 0;
 
-		if(gameInfo.variant == VariantSChess) promo = PromoSuffix(p);
+		if(gameInfo.variant == VariantSChess) {
+		    promo = PromoSuffix(p);
+		    if(promo && **p >= 'a' && **p < AAA + BOARD_RGHT) gate = *(*p)++;
+		}
 
 		if (yyskipmoves) return (int) AmbiguousMove; /* not disambiguated */
 
@@ -679,6 +682,12 @@ badMove:// we failed to find algebraic move
 		    }
 		    if (appData.debugMode) fprintf(debugFP, "Parser FRC (type=%d) %d %d\n", castlingType, ff, ft);
 		    if(ff == NoRights || ft == NoRights) return ImpossibleMove;
+		}
+		if(gate) { // gating disambiguator present
+		    if(gate != ff + AAA) {
+			int h = ft; ft = ff; ff = h; // reverse for gating at Rook square
+			if(gate != AAA + initialRights[castlingType+(wom?-1:2)]) return ImpossibleMove;
+		    }
 		}
 		sprintf(currentMoveString, "%c%c%c%c%c",ff+AAA,rf+ONE,ft+AAA,rt+ONE,promo);
 		if (appData.debugMode) fprintf(debugFP, "(%d-type) castling %d %d\n", castlingType, ff, ft);
