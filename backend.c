@@ -6746,7 +6746,7 @@ HasPromotionChoice (int fromX, int fromY, int toX, int toY, char *promoChoice, i
     } else if(gameInfo.variant == VariantShogi) {
         promotionZoneSize = (BOARD_HEIGHT- deadRanks)/3 +(BOARD_HEIGHT == 8);
         highestPromotingPiece = (int)WhiteAlfil;
-        if(PieceToChar(piece) != '+' || PieceToChar(CHUPROMOTED(piece)) == '+') highestPromotingPiece = piece;
+        if(PieceToChar(piece) != '+' && PieceToChar(CHUPROMOTED(piece)) == '+') highestPromotingPiece = piece;
     } else if(gameInfo.variant == VariantMakruk || gameInfo.variant == VariantGrand || gameInfo.variant == VariantChuChess) {
         promotionZoneSize = 3;
     }
