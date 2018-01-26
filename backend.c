@@ -9257,6 +9257,7 @@ FakeBookMove: // [HGM] book: we jump here to simulate machine moves after book h
           NonStandardBoardSize(gameInfo.variant, gameInfo.boardWidth, gameInfo.boardHeight, gameInfo.holdingsSize))
 					) { // [HGM] allow first engine to define opening position
       int dummy, w, h, hand, s=6; char buf[MSG_SIZ], varName[MSG_SIZ];
+      Board tmp;
       if(appData.icsActive || forwardMostMove != 0 || cps != &first) return;
       *buf = NULLCHAR;
       if(sscanf(message, "setup (%s", buf) == 1) {
@@ -9277,10 +9278,11 @@ FakeBookMove: // [HGM] book: we jump here to simulate machine moves after book h
           startedFromSetupPosition = FALSE;
         }
       }
-      if(startedFromSetupPosition) return;
+      CopyBoard(tmp, boards[0]);
       ParseFEN(boards[0], &dummy, message+s, FALSE);
-      DrawPosition(TRUE, boards[0]);
       CopyBoard(initialPosition, boards[0]);
+      if(startedFromSetupPosition) { CopyBoard(boards[0], tmp); return; }
+      DrawPosition(TRUE, boards[0]);
       startedFromSetupPosition = TRUE;
       return;
     }
