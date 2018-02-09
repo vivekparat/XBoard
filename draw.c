@@ -774,7 +774,7 @@ DrawLogo (Option *opt, void *logo)
 static void
 BlankSquare (cairo_surface_t *dest, int x, int y, int color, ChessSquare piece, int fac)
 {   // [HGM] extra param 'fac' for forcing destination to (0,0) for copying to animation buffer
-    int x0, y0, texture = (useTexture & color+1) && CutOutSquare(x, y, &x0, &y0, color);
+    int x0, y0, texture = color < 2 && (useTexture & color+1) && CutOutSquare(x, y, &x0, &y0, color);
     cairo_t *cr;
 
     cr = cairo_create (dest);
