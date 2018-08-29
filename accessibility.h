@@ -52,10 +52,6 @@
  ** See the file ChangeLog for a revision history.  */
 
 
-int CoordToNum(c);
-char* PieceToName(p, i);
-char* SquareToChar(x);
-char* SquareToNum(y);
 
 
 void SayWhosTurn();

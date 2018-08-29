@@ -247,6 +247,10 @@ void PrintPGNTags P((FILE *f, GameInfo *));
 int ParsePGNTag P((char *, GameInfo *));
 char *PGNResult P((ChessMove result));
 
+/* accessibility.h prototypes */
+char* PieceToName(p, i);
+char* SquareToChar(x);
+char* SquareToNum(y);
 
 /* gamelist.c prototypes
  */
